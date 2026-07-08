@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="generator" content="Hugo 0.149.0">
+    <meta name="generator" content="Hugo 0.164.0">
     <meta name="description" content="Documentation for osctrl: Fast and efficient osquery management">
 <meta name="author" content="Javier Marcos, JMP Sec">
 
@@ -12,21 +12,21 @@
     <title>osctrld :: osctrl: Fast and efficient osquery management</title>
 
     
-    <link href="/css/nucleus.css?1780848306" rel="stylesheet">
-    <link href="/css/fontawesome-all.min.css?1780848306" rel="stylesheet">
-    <link href="/css/hybrid.css?1780848306" rel="stylesheet">
-    <link href="/css/featherlight.min.css?1780848306" rel="stylesheet">
-    <link href="/css/perfect-scrollbar.min.css?1780848306" rel="stylesheet">
-    <link href="/css/auto-complete.css?1780848306" rel="stylesheet">
-    <link href="/css/atom-one-dark-reasonable.css?1780848306" rel="stylesheet">
-    <link href="/css/theme.css?1780848306" rel="stylesheet">
-    <link href="/css/hugo-theme.css?1780848306" rel="stylesheet">
+    <link href="/css/nucleus.css?1783508631" rel="stylesheet">
+    <link href="/css/fontawesome-all.min.css?1783508631" rel="stylesheet">
+    <link href="/css/hybrid.css?1783508631" rel="stylesheet">
+    <link href="/css/featherlight.min.css?1783508631" rel="stylesheet">
+    <link href="/css/perfect-scrollbar.min.css?1783508631" rel="stylesheet">
+    <link href="/css/auto-complete.css?1783508631" rel="stylesheet">
+    <link href="/css/atom-one-dark-reasonable.css?1783508631" rel="stylesheet">
+    <link href="/css/theme.css?1783508631" rel="stylesheet">
+    <link href="/css/hugo-theme.css?1783508631" rel="stylesheet">
     
-    <link href="/css/theme-osctrl.css?1780848306" rel="stylesheet">
+    <link href="/css/theme-osctrl.css?1783508631" rel="stylesheet">
     
     
 
-    <script src="/js/jquery-3.3.1.min.js?1780848306"></script>
+    <script src="/js/jquery-3.3.1.min.js?1783508631"></script>
 
     <style>
       :root #header + #content > #left > #rlblock_left{
@@ -95,14 +95,14 @@
     <span data-search-clear=""><i class="fas fa-times"></i></span>
 </div>
 
-<script type="text/javascript" src="/js/lunr.min.js?1780848306"></script>
-<script type="text/javascript" src="/js/auto-complete.js?1780848306"></script>
+<script type="text/javascript" src="/js/lunr.min.js?1783508631"></script>
+<script type="text/javascript" src="/js/auto-complete.js?1783508631"></script>
 <script type="text/javascript">
     
         var baseurl = "https:\/\/osctrl.net\/";
     
 </script>
-<script type="text/javascript" src="/js/search.js?1780848306"></script>
+<script type="text/javascript" src="/js/search.js?1783508631"></script>
  
   </div>
 
@@ -619,6 +619,24 @@
     
             
 <li
+  data-nav-id="/usage/osctrl-cli/shell/"
+  title="shell"
+  class="dd-item
+        
+        
+        
+        "
+>
+  <a href="/usage/osctrl-cli/shell/">
+    shell 
+    <i class="fas fa-check read-icon"></i>
+    
+  </a>
+   
+</li>
+    
+            
+<li
   data-nav-id="/usage/osctrl-cli/tag/"
   title="tag"
   class="dd-item
@@ -866,17 +884,17 @@
 	<p><code>osctrld</code> is no longer described upstream as a standalone daemon binary. In current <strong>osctrl</strong> development, the osctrld functionality is exposed by <code>osctrl-tls</code> when <code>osctrld.enabled: true</code> in YAML or <code>--enable-osctrld</code> is passed on startup.</p>
 <p>That means the old <code>./osctrld -h</code> flow documented here is stale. The current source mounts the osctrld endpoints inside <code>osctrl-tls</code> and keeps the feature focused on bootstrapping and maintaining osquery installations.</p>
 <h2 id="enabling-osctrld-endpoints">Enabling osctrld endpoints</h2>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">osctrld</span>:
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">osctrld</span>:
 </span></span><span style="display:flex;"><span>  <span style="color:#f92672">enabled</span>: <span style="color:#66d9ef">true</span>
 </span></span></code></pre></div><p>Or with flags on <code>osctrl-tls</code>:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-properties" data-lang="properties"><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">--enable-osctrld</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-properties" data-lang="properties"><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">--enable-osctrld</span>
 </span></span></code></pre></div><h2 id="current-endpoints">Current endpoints</h2>
 <p>All osctrld routes are mounted under <code>osctrl-tls</code> and expect the environment UUID in the path.</p>
 <h3 id="retrieve-generated-flags">Retrieve generated flags</h3>
 <p>Route:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-properties" data-lang="properties"><span style="display:flex;"><span><span style="color:#a6e22e">POST</span> <span style="color:#e6db74">/{env_uuid}/osctrld-flags</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-properties" data-lang="properties"><span style="display:flex;"><span><span style="color:#a6e22e">POST</span> <span style="color:#e6db74">/{env_uuid}/osctrld-flags</span>
 </span></span></code></pre></div><p>Request body:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
 </span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;secret&#34;</span>: <span style="color:#e6db74">&#34;environment-secret&#34;</span>,
 </span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;secretFile&#34;</span>: <span style="color:#e6db74">&#34;/etc/osquery/osquery.secret&#34;</span>,
 </span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;certFile&#34;</span>: <span style="color:#e6db74">&#34;/etc/osquery/osquery-server.crt&#34;</span>
@@ -885,38 +903,38 @@
 <p>Plain-text osquery flags generated for that environment.</p>
 <h3 id="retrieve-environment-certificate">Retrieve environment certificate</h3>
 <p>Route:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-properties" data-lang="properties"><span style="display:flex;"><span><span style="color:#a6e22e">POST</span> <span style="color:#e6db74">/{env_uuid}/osctrld-cert</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-properties" data-lang="properties"><span style="display:flex;"><span><span style="color:#a6e22e">POST</span> <span style="color:#e6db74">/{env_uuid}/osctrld-cert</span>
 </span></span></code></pre></div><p>Request body:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
 </span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;secret&#34;</span>: <span style="color:#e6db74">&#34;environment-secret&#34;</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>Response:</p>
 <p>Plain-text PEM certificate stored in the environment.</p>
 <h3 id="verify-the-full-payload">Verify the full payload</h3>
 <p>Route:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-properties" data-lang="properties"><span style="display:flex;"><span><span style="color:#a6e22e">POST</span> <span style="color:#e6db74">/{env_uuid}/osctrld-verify</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-properties" data-lang="properties"><span style="display:flex;"><span><span style="color:#a6e22e">POST</span> <span style="color:#e6db74">/{env_uuid}/osctrld-verify</span>
 </span></span></code></pre></div><p>Request body:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
 </span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;secret&#34;</span>: <span style="color:#e6db74">&#34;environment-secret&#34;</span>,
 </span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;secretFile&#34;</span>: <span style="color:#e6db74">&#34;/etc/osquery/osquery.secret&#34;</span>,
 </span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;certFile&#34;</span>: <span style="color:#e6db74">&#34;/etc/osquery/osquery-server.crt&#34;</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>Response:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
 </span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;flags&#34;</span>: <span style="color:#e6db74">&#34;...&#34;</span>,
 </span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;certificate&#34;</span>: <span style="color:#e6db74">&#34;-----BEGIN CERTIFICATE-----...&#34;</span>,
 </span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;osquery_version&#34;</span>: <span style="color:#e6db74">&#34;5.23.0&#34;</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><h3 id="generate-install-or-remove-scripts">Generate install or remove scripts</h3>
 <p>Route:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-properties" data-lang="properties"><span style="display:flex;"><span><span style="color:#a6e22e">POST</span> <span style="color:#e6db74">/{env_uuid}/{action}/{platform}/osctrld-script</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-properties" data-lang="properties"><span style="display:flex;"><span><span style="color:#a6e22e">POST</span> <span style="color:#e6db74">/{env_uuid}/{action}/{platform}/osctrld-script</span>
 </span></span></code></pre></div><p>Supported values:</p>
 <ul>
 <li><code>action</code>: <code>enroll</code> or <code>remove</code></li>
 <li><code>platform</code>: <code>linux</code>, <code>darwin</code> or <code>windows</code></li>
 </ul>
 <p>Request body:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
 </span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;secret&#34;</span>: <span style="color:#e6db74">&#34;environment-secret&#34;</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>Response:</p>
@@ -925,7 +943,7 @@
 <p><code>osctrl-tls</code> also exposes quick links that are validated with the environment secret path instead of the long-lived environment secret.</p>
 <h3 id="quick-enroll--remove-script-distribution">Quick enroll / remove script distribution</h3>
 <p>Route:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-properties" data-lang="properties"><span style="display:flex;"><span><span style="color:#a6e22e">GET</span> <span style="color:#e6db74">/{env_uuid}/{secret_path}/{script}</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-properties" data-lang="properties"><span style="display:flex;"><span><span style="color:#a6e22e">GET</span> <span style="color:#e6db74">/{env_uuid}/{secret_path}/{script}</span>
 </span></span></code></pre></div><p>Notes:</p>
 <ul>
 <li><code>script</code> must start with <code>enroll</code> or <code>remove</code>.</li>
@@ -933,7 +951,7 @@
 </ul>
 <h3 id="package-download">Package download</h3>
 <p>Route:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-properties" data-lang="properties"><span style="display:flex;"><span><span style="color:#a6e22e">GET</span> <span style="color:#e6db74">/{env_uuid}/{secret_path}/package/{package}</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-properties" data-lang="properties"><span style="display:flex;"><span><span style="color:#a6e22e">GET</span> <span style="color:#e6db74">/{env_uuid}/{secret_path}/package/{package}</span>
 </span></span></code></pre></div><p>Supported package values:</p>
 <ul>
 <li><code>deb</code></li>
@@ -1473,6 +1491,22 @@
             
         
                     
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
             
         
                     
@@ -1533,19 +1567,19 @@
     <div style="left: -1000px; overflow: scroll; position: absolute; top: -1000px; border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;">
       <div style="border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;"></div>
     </div>
-    <script src="/js/clipboard.min.js?1780848306"></script>
-    <script src="/js/perfect-scrollbar.min.js?1780848306"></script>
-    <script src="/js/perfect-scrollbar.jquery.min.js?1780848306"></script>
-    <script src="/js/jquery.sticky.js?1780848306"></script>
-    <script src="/js/featherlight.min.js?1780848306"></script>
-    <script src="/js/highlight.pack.js?1780848306"></script>
+    <script src="/js/clipboard.min.js?1783508631"></script>
+    <script src="/js/perfect-scrollbar.min.js?1783508631"></script>
+    <script src="/js/perfect-scrollbar.jquery.min.js?1783508631"></script>
+    <script src="/js/jquery.sticky.js?1783508631"></script>
+    <script src="/js/featherlight.min.js?1783508631"></script>
+    <script src="/js/highlight.pack.js?1783508631"></script>
     <script>hljs.initHighlightingOnLoad();</script>
-    <script src="/js/modernizr.custom-3.6.0.js?1780848306"></script>
-    <script src="/js/learn.js?1780848306"></script>
-    <script src="/js/hugo-learn.js?1780848306"></script>
+    <script src="/js/modernizr.custom-3.6.0.js?1783508631"></script>
+    <script src="/js/learn.js?1783508631"></script>
+    <script src="/js/hugo-learn.js?1783508631"></script>
 
-    <link href="/mermaid/mermaid.css?1780848306" rel="stylesheet" />
-    <script src="/mermaid/mermaid.js?1780848306"></script>
+    <link href="/mermaid/mermaid.css?1783508631" rel="stylesheet" />
+    <script src="/mermaid/mermaid.js?1783508631"></script>
     <script>
         mermaid.initialize({ startOnLoad: true });
     </script>

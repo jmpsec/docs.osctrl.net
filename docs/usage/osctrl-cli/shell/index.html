@@ -9,7 +9,7 @@
 
     <link rel="icon" href="/favicon.png" type="image/png">
 
-    <title>query :: osctrl: Fast and efficient osquery management</title>
+    <title>shell :: osctrl: Fast and efficient osquery management</title>
 
     
     <link href="/css/nucleus.css?1783508631" rel="stylesheet">
@@ -69,7 +69,7 @@
 </style>
 
   </head>
-  <body class="" data-url="/usage/osctrl-cli/query/">
+  <body class="" data-url="/usage/osctrl-cli/shell/">
     <nav
   id="sidebar"
   class="showVisitedLinks"
@@ -587,7 +587,7 @@
   title="query"
   class="dd-item
         
-        active
+        
         
         "
 >
@@ -623,7 +623,7 @@
   title="shell"
   class="dd-item
         
-        
+        active
         
         "
 >
@@ -794,7 +794,7 @@
                   
                   
                   <div id="top-github-link">
-                    <a class="github-link" title='Edit this page' href="https://github.com/jmpsec/osctrl-docs/edit/master/content/usage/osctrl-cli/query/_index.md" target="blank">
+                    <a class="github-link" title='Edit this page' href="https://github.com/jmpsec/osctrl-docs/edit/master/content/usage/osctrl-cli/shell/_index.md" target="blank">
                       <i class="fas fa-code-branch"></i>
                       <span id="top-github-link-text">Edit this page</span>
                     </a>
@@ -829,7 +829,7 @@
             
           
           
-            <a href='/'></a> > <a href='/usage/'>Usage</a> > <a href='/usage/osctrl-cli/'>osctrl-cli</a> > query
+            <a href='/'></a> > <a href='/usage/'>Usage</a> > <a href='/usage/osctrl-cli/'>osctrl-cli</a> > shell
           
         
           
@@ -848,7 +848,7 @@
   <ul>
     <li>
       <ul>
-        <li><a href="#query">Query</a></li>
+        <li><a href="#interactive-shell">Interactive shell</a></li>
       </ul>
     </li>
   </ul>
@@ -868,7 +868,7 @@
           
             <h1>
               
-              query
+              shell
             </h1>
           
 
@@ -876,35 +876,24 @@
 
 
 
-	<h3 id="query">Query</h3>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-properties" data-lang="properties"><span style="display:flex;"><span><span style="color:#a6e22e">$</span> <span style="color:#e6db74">./osctrl-cli query -h</span>
+	<h3 id="interactive-shell">Interactive shell</h3>
+<p><code>osctrl-cli shell</code> opens a persistent, Metasploit-style interactive session
+that keeps the backend connection open and exposes the same surface as the
+CLI subcommands through a context-based REPL. Instead of re-invoking the
+binary per action, you enter a module (<code>use nodes</code>, <code>use queries</code>, &hellip;), run
+commands against it (<code>list</code>, <code>show &lt;id&gt;</code>, <code>run &lt;sql&gt;</code>), and switch context as
+needed. It is available both in <code>--db</code> mode (direct database access) and
+<code>--api</code> mode (remote REST API).</p>
+<p>Execute <code>./osctrl-cli shell -h</code> to show the help for the shell command:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-properties" data-lang="properties"><span style="display:flex;"><span><span style="color:#a6e22e">$</span> <span style="color:#e6db74">./osctrl-cli shell -h</span>
 </span></span><span style="display:flex;"><span><span style="color:#a6e22e">NAME</span><span style="color:#f92672">:</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">osctrl-cli</span> <span style="color:#e6db74">query - Commands for queries</span>
+</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">osctrl-cli</span> <span style="color:#e6db74">shell - Interactive shell session (Metasploit-style) — access nodes, queries, carves, ...</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#a6e22e">USAGE</span><span style="color:#f92672">:</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">osctrl-cli</span> <span style="color:#e6db74">query [command [command options]]</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">COMMANDS</span><span style="color:#f92672">:</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">complete,</span> <span style="color:#e6db74">c  Mark an on-demand query as completed</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">delete,</span> <span style="color:#e6db74">d    Mark an on-demand query as deleted</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">expire,</span> <span style="color:#e6db74">e    Mark an on-demand query as expired</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">run,</span> <span style="color:#e6db74">r       Start a new on-demand query</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">list,</span> <span style="color:#e6db74">l      List on-demand queries</span>
+</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">osctrl-cli</span> <span style="color:#e6db74">shell [options]</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#a6e22e">OPTIONS</span><span style="color:#f92672">:</span>
 </span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--help,</span> <span style="color:#e6db74">-h  show help</span>
-</span></span></code></pre></div><h4 id="complete-query">Complete query</h4>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-properties" data-lang="properties"><span style="display:flex;"><span><span style="color:#a6e22e">$</span> <span style="color:#e6db74">./osctrl-cli query complete -h</span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">NAME</span><span style="color:#f92672">:</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">osctrl-cli</span> <span style="color:#e6db74">query complete - Mark an on-demand query as completed</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">USAGE</span><span style="color:#f92672">:</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">osctrl-cli</span> <span style="color:#e6db74">query complete [options]</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">OPTIONS</span><span style="color:#f92672">:</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--name</span> <span style="color:#e6db74">string, -n string  Query name to be completed</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--env</span> <span style="color:#e6db74">string, -e string   Environment to be used</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--help,</span> <span style="color:#e6db74">-h                show help</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#a6e22e">GLOBAL</span> <span style="color:#e6db74">OPTIONS:</span>
 </span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--db,</span> <span style="color:#e6db74">-d                           Connect to local osctrl DB using YAML config file [$DB_CONFIG]</span>
@@ -926,149 +915,532 @@
 </span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--output-format</span> <span style="color:#e6db74">string, -o string  Format to be used for data output (default: &#34;pretty&#34;) [$OUTPUT_FORMAT]</span>
 </span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--silent,</span> <span style="color:#e6db74">-s                       Silent mode</span>
 </span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--version,</span> <span style="color:#e6db74">-v                      Print version information</span>
-</span></span></code></pre></div><h4 id="delete-query">Delete query</h4>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-properties" data-lang="properties"><span style="display:flex;"><span><span style="color:#a6e22e">$</span> <span style="color:#e6db74">./osctrl-cli query delete -h</span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">NAME</span><span style="color:#f92672">:</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">osctrl-cli</span> <span style="color:#e6db74">query delete - Mark an on-demand query as deleted</span>
+</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--help,</span> <span style="color:#e6db74">-h                         show help</span>
+</span></span></code></pre></div><p>The shell accepts the aliases <code>console</code>, <code>interactive</code> and <code>repl</code>, so all of
+the following are equivalent:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>$ ./osctrl-cli shell --db -D db.yml
+</span></span><span style="display:flex;"><span>$ ./osctrl-cli console --api -A osctrl-api.json
+</span></span><span style="display:flex;"><span>$ ./osctrl-cli interactive --db -D db.yml
+</span></span><span style="display:flex;"><span>$ ./osctrl-cli repl --api -A osctrl-api.json
+</span></span></code></pre></div><p>You must enable <code>--db</code> or <code>--api</code> (with a reachable backend) to use the shell;
+without one it exits with an error.</p>
+<h4 id="sessions-contexts-and-the-prompt">Sessions, contexts and the prompt</h4>
+<p>Once the backend connection is established the shell prints a banner and drops
+you at the top-level prompt. The prompt reflects the active environment and,
+when you are inside a module, the module context:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>🛡️  osctrl-cli interactive shell  v0.5.4
+</span></span><span style="display:flex;"><span>📡  db mode
+</span></span><span style="display:flex;"><span>💡  Type &#39;help&#39; or &#39;?&#39; for help · &#39;exit&#39; to quit
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">USAGE</span><span style="color:#f92672">:</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">osctrl-cli</span> <span style="color:#e6db74">query delete [options]</span>
+</span></span><span style="display:flex;"><span>osctrl&gt;               top level, no environment set
+</span></span><span style="display:flex;"><span>osctrl[dev]&gt;          top level, active env is &#34;dev&#34;
+</span></span><span style="display:flex;"><span>osctrl (nodes:dev)&gt;   inside the &#34;nodes&#34; module, active env &#34;dev&#34;
+</span></span></code></pre></div><p>The active environment is shared across every module, so <code>use queries</code> after
+<code>use nodes</code> keeps the same environment you selected. Set it once with
+<code>set env &lt;name&gt;</code> and every list/show/run acts against that environment until
+you change it.</p>
+<h4 id="global-commands">Global commands</h4>
+<p>These are available from the top level and from inside any module:</p>
+<table>
+	<thead>
+			<tr>
+					<th>Command</th>
+					<th>Description</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>help</code> (or <code>?</code>)</td>
+					<td>Show help for the current context. At the top level it lists every module; inside a module it lists that module&rsquo;s commands.</td>
+			</tr>
+			<tr>
+					<td><code>use &lt;module&gt;</code></td>
+					<td>Enter a module context (<code>nodes</code>, <code>queries</code>, <code>carves</code>, <code>environments</code>, <code>tags</code>, <code>users</code>, <code>audit</code>, <code>settings</code>).</td>
+			</tr>
+			<tr>
+					<td><code>back</code></td>
+					<td>Leave the current module context and return to the top level.</td>
+			</tr>
+			<tr>
+					<td><code>set env &lt;name&gt;</code></td>
+					<td>Set the active environment all modules operate against.</td>
+			</tr>
+			<tr>
+					<td><code>set &lt;option&gt; &lt;value&gt;</code></td>
+					<td>Set a run option used by <code>run</code> (see <a href="#run-options">Run options</a>).</td>
+			</tr>
+			<tr>
+					<td><code>show</code> / <code>show environments</code> / <code>show env</code></td>
+					<td>List all TLS environments.</td>
+			</tr>
+			<tr>
+					<td><code>stats</code></td>
+					<td>Print dashboard statistics across environments (totals, active/inactive nodes, platforms, per-environment queries and carves).</td>
+			</tr>
+			<tr>
+					<td><code>exit</code> (or <code>quit</code>)</td>
+					<td>Exit the shell. Ctrl-D also exits; Ctrl-C aborts the current line and stays in the shell.</td>
+			</tr>
+	</tbody>
+</table>
+<p>The shell provides tab completion for commands, module names, environment
+names, and the primary resource key of the active module (node UUIDs/hostnames,
+query names), refreshed as you run <code>list</code>/<code>show</code>.</p>
+<h4 id="modules">Modules</h4>
+<p>Type <code>help</code> at the top level to see the available modules:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>📚 osctrl-cli interactive shell
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">OPTIONS</span><span style="color:#f92672">:</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--name</span> <span style="color:#e6db74">string, -n string  Query name to be deleted</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--env</span> <span style="color:#e6db74">string, -e string   Environment to be used</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--help,</span> <span style="color:#e6db74">-h                show help</span>
+</span></span><span style="display:flex;"><span>Modules (use &lt;module&gt;):
+</span></span><span style="display:flex;"><span>  🖥️  nodes         enrolled osquery nodes
+</span></span><span style="display:flex;"><span>  🔍  queries       on-demand distributed queries
+</span></span><span style="display:flex;"><span>  📦  carves        file carves
+</span></span><span style="display:flex;"><span>  🌐  environments  TLS environments
+</span></span><span style="display:flex;"><span>  🏷️  tags          node tags
+</span></span><span style="display:flex;"><span>  👤  users         users and permissions
+</span></span><span style="display:flex;"><span>  📜  audit         audit logs
+</span></span><span style="display:flex;"><span>  🛠️  settings      configuration values (db mode)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">GLOBAL</span> <span style="color:#e6db74">OPTIONS:</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--db,</span> <span style="color:#e6db74">-d                           Connect to local osctrl DB using YAML config file [$DB_CONFIG]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--api,</span> <span style="color:#e6db74">-a                          Connect to remote osctrl using JSON config file [$API_CONFIG]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--api-file</span> <span style="color:#e6db74">FILE, -A FILE           Load API JSON configuration from FILE (default: &#34;osctrl-api.json&#34;) [$API_CONFIG_FILE]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--api-url</span> <span style="color:#e6db74">string, -U string        The URL for osctrl API to be used [$API_URL]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--api-token</span> <span style="color:#e6db74">string, -T string      Token to authenticate with the osctrl API [$API_TOKEN]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--db-file</span> <span style="color:#e6db74">FILE, -D FILE            Load DB YAML configuration from FILE [$DB_CONFIG_FILE]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--db-host</span> <span style="color:#e6db74">string                   Backend host to be connected to (default: &#34;127.0.0.1&#34;) [$DB_HOST]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--db-port</span> <span style="color:#e6db74">int                      Backend port to be connected to (default: 5432) [$DB_PORT]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--db-name</span> <span style="color:#e6db74">string                   Database name to be used in the backend (default: &#34;osctrl&#34;) [$DB_NAME]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--db-user</span> <span style="color:#e6db74">string                   Username to be used for the backend (default: &#34;postgres&#34;) [$DB_USER]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--db-pass</span> <span style="color:#e6db74">string                   Password to be used for the backend (default: &#34;postgres&#34;) [$DB_PASS]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--db-max-idle-conns</span> <span style="color:#e6db74">int            Maximum number of connections in the idle connection pool (default: 20) [$DB_MAX_IDLE_CONNS]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--db-max-open-conns</span> <span style="color:#e6db74">int            Maximum number of open connections to the database (default: 100) [$DB_MAX_OPEN_CONNS]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--db-conn-max-lifetime</span> <span style="color:#e6db74">int         Maximum amount of time a connection may be reused (default: 30) [$DB_CONN_MAX_LIFETIME]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--insecure,</span> <span style="color:#e6db74">-i                     Allow insecure server connections when using SSL</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--verbose,</span> <span style="color:#e6db74">-V                      Increase output verbosity for debugging</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--output-format</span> <span style="color:#e6db74">string, -o string  Format to be used for data output (default: &#34;pretty&#34;) [$OUTPUT_FORMAT]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--silent,</span> <span style="color:#e6db74">-s                       Silent mode</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--version,</span> <span style="color:#e6db74">-v                      Print version information</span>
-</span></span></code></pre></div><h4 id="expire-query">Expire query</h4>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-properties" data-lang="properties"><span style="display:flex;"><span><span style="color:#a6e22e">$</span> <span style="color:#e6db74">./osctrl-cli query expire -h</span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">NAME</span><span style="color:#f92672">:</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">osctrl-cli</span> <span style="color:#e6db74">query expire - Mark an on-demand query as expired</span>
+</span></span><span style="display:flex;"><span>Global commands:
+</span></span><span style="display:flex;"><span>  help                       show help for the current context
+</span></span><span style="display:flex;"><span>  use &lt;module&gt;               enter a module context
+</span></span><span style="display:flex;"><span>  back                       leave the current module context
+</span></span><span style="display:flex;"><span>  set env &lt;name&gt;  |  &lt;option&gt; &lt;value&gt;  set active env or a run option
+</span></span><span style="display:flex;"><span>  show environments | env    list environments
+</span></span><span style="display:flex;"><span>  stats                      dashboard statistics across environments
+</span></span><span style="display:flex;"><span>  exit                       exit the shell
+</span></span></code></pre></div><h5 id="nodes">nodes</h5>
+<p>Commands for enrolled osquery nodes in the active environment.</p>
+<table>
+	<thead>
+			<tr>
+					<th>Command</th>
+					<th>Arguments</th>
+					<th>Description</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>list</code> (or <code>ls</code>)</td>
+					<td><code>[active|inactive|all]</code></td>
+					<td>List nodes (default: <code>all</code>).</td>
+			</tr>
+			<tr>
+					<td><code>search</code></td>
+					<td><code>&lt;query&gt;</code></td>
+					<td>Search nodes by hostname/uuid/ip/localname/username.</td>
+			</tr>
+			<tr>
+					<td><code>show</code></td>
+					<td><code>&lt;uuid|hostname&gt;</code></td>
+					<td>Show full node detail.</td>
+			</tr>
+			<tr>
+					<td><code>delete</code> (or <code>rm</code>)</td>
+					<td><code>&lt;uuid&gt;</code></td>
+					<td>Delete (archive) a node, with confirmation.</td>
+			</tr>
+			<tr>
+					<td><code>tag</code></td>
+					<td><code>&lt;uuid&gt; &lt;tag&gt;</code></td>
+					<td>Apply a tag to a node.</td>
+			</tr>
+	</tbody>
+</table>
+<h5 id="queries">queries</h5>
+<p>Commands for on-demand distributed queries in the active environment.</p>
+<table>
+	<thead>
+			<tr>
+					<th>Command</th>
+					<th>Arguments</th>
+					<th>Description</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>list</code> (or <code>ls</code>)</td>
+					<td><code>[active|completed|expired|deleted|hidden|all]</code></td>
+					<td>List queries (default: <code>active</code>).</td>
+			</tr>
+			<tr>
+					<td><code>show</code></td>
+					<td><code>&lt;name&gt;</code></td>
+					<td>Show query detail.</td>
+			</tr>
+			<tr>
+					<td><code>run</code></td>
+					<td><code>&lt;sql&gt;</code></td>
+					<td>Dispatch a new query using the active <a href="#run-options">run options</a>.</td>
+			</tr>
+			<tr>
+					<td><code>results</code></td>
+					<td><code>&lt;name&gt;</code></td>
+					<td>Show the results for a query.</td>
+			</tr>
+			<tr>
+					<td><code>complete</code></td>
+					<td><code>&lt;name&gt;</code></td>
+					<td>Mark a query as completed.</td>
+			</tr>
+			<tr>
+					<td><code>expire</code></td>
+					<td><code>&lt;name&gt;</code></td>
+					<td>Expire a query.</td>
+			</tr>
+			<tr>
+					<td><code>delete</code> (or <code>rm</code>)</td>
+					<td><code>&lt;name&gt;</code></td>
+					<td>Delete a query, with confirmation.</td>
+			</tr>
+			<tr>
+					<td><code>options</code></td>
+					<td></td>
+					<td>Show the current run options.</td>
+			</tr>
+	</tbody>
+</table>
+<h5 id="carves">carves</h5>
+<p>Commands for file carves in the active environment.</p>
+<table>
+	<thead>
+			<tr>
+					<th>Command</th>
+					<th>Arguments</th>
+					<th>Description</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>list</code> (or <code>ls</code>)</td>
+					<td><code>[active|completed|expired|deleted|all]</code></td>
+					<td>List carve queries (default: <code>active</code>).</td>
+			</tr>
+			<tr>
+					<td><code>files</code></td>
+					<td></td>
+					<td>List the carved files in the active environment.</td>
+			</tr>
+			<tr>
+					<td><code>show</code></td>
+					<td><code>&lt;name&gt;</code></td>
+					<td>Show carve query detail.</td>
+			</tr>
+			<tr>
+					<td><code>run</code></td>
+					<td><code>&lt;path&gt;</code></td>
+					<td>Start a carve for a file or directory using the active run options.</td>
+			</tr>
+			<tr>
+					<td><code>complete</code></td>
+					<td><code>&lt;name&gt;</code></td>
+					<td>Mark a carve as completed.</td>
+			</tr>
+			<tr>
+					<td><code>expire</code></td>
+					<td><code>&lt;name&gt;</code></td>
+					<td>Expire a carve.</td>
+			</tr>
+			<tr>
+					<td><code>delete</code> (or <code>rm</code>)</td>
+					<td><code>&lt;name&gt;</code></td>
+					<td>Delete a carve, with confirmation.</td>
+			</tr>
+			<tr>
+					<td><code>options</code></td>
+					<td></td>
+					<td>Show the current run options.</td>
+			</tr>
+	</tbody>
+</table>
+<h5 id="environments">environments</h5>
+<p>Commands for TLS environments. <code>delete</code> is only available in <code>--db</code> mode; the
+enroll/remove URL actions work in both modes.</p>
+<table>
+	<thead>
+			<tr>
+					<th>Command</th>
+					<th>Arguments</th>
+					<th>Description</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>list</code> (or <code>ls</code>)</td>
+					<td></td>
+					<td>List environments.</td>
+			</tr>
+			<tr>
+					<td><code>show</code></td>
+					<td><code>&lt;name&gt;</code></td>
+					<td>Show environment detail (hostname, type, enroll/remove expiry, &hellip;).</td>
+			</tr>
+			<tr>
+					<td><code>delete</code> (or <code>rm</code>)</td>
+					<td><code>&lt;name&gt;</code></td>
+					<td>Delete an environment (db mode only), with confirmation.</td>
+			</tr>
+			<tr>
+					<td><code>extend-enroll</code></td>
+					<td><code>&lt;name&gt;</code></td>
+					<td>Extend the enroll URL expiry.</td>
+			</tr>
+			<tr>
+					<td><code>rotate-enroll</code></td>
+					<td><code>&lt;name&gt;</code></td>
+					<td>Rotate the enroll URL.</td>
+			</tr>
+			<tr>
+					<td><code>expire-enroll</code></td>
+					<td><code>&lt;name&gt;</code></td>
+					<td>Expire the enroll URL.</td>
+			</tr>
+			<tr>
+					<td><code>notexpire-enroll</code></td>
+					<td><code>&lt;name&gt;</code></td>
+					<td>Mark the enroll URL as non-expiring.</td>
+			</tr>
+			<tr>
+					<td><code>extend-remove</code></td>
+					<td><code>&lt;name&gt;</code></td>
+					<td>Extend the remove URL expiry.</td>
+			</tr>
+			<tr>
+					<td><code>rotate-remove</code></td>
+					<td><code>&lt;name&gt;</code></td>
+					<td>Rotate the remove URL.</td>
+			</tr>
+			<tr>
+					<td><code>expire-remove</code></td>
+					<td><code>&lt;name&gt;</code></td>
+					<td>Expire the remove URL.</td>
+			</tr>
+			<tr>
+					<td><code>notexpire-remove</code></td>
+					<td><code>&lt;name&gt;</code></td>
+					<td>Mark the remove URL as non-expiring.</td>
+			</tr>
+	</tbody>
+</table>
+<h5 id="tags">tags</h5>
+<p>Commands for node tags. <code>add</code>/<code>edit</code>/<code>delete</code> operate in the active
+environment.</p>
+<table>
+	<thead>
+			<tr>
+					<th>Command</th>
+					<th>Arguments</th>
+					<th>Description</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>list</code> (or <code>ls</code>)</td>
+					<td><code>[env]</code></td>
+					<td>List tags (active env if omitted).</td>
+			</tr>
+			<tr>
+					<td><code>show</code></td>
+					<td><code>&lt;name&gt;</code></td>
+					<td>Show tag detail.</td>
+			</tr>
+			<tr>
+					<td><code>add</code></td>
+					<td><code>&lt;name&gt; [color=.. icon=.. desc=.. type=.. custom=..]</code></td>
+					<td>Add a tag to the active env.</td>
+			</tr>
+			<tr>
+					<td><code>edit</code></td>
+					<td><code>&lt;name&gt; [color=.. icon=.. desc=.. type=.. custom=..]</code></td>
+					<td>Edit a tag in the active env.</td>
+			</tr>
+			<tr>
+					<td><code>delete</code> (or <code>rm</code>)</td>
+					<td><code>&lt;name&gt;</code></td>
+					<td>Delete a tag, with confirmation.</td>
+			</tr>
+	</tbody>
+</table>
+<h5 id="users">users</h5>
+<p>Commands for users and permissions.</p>
+<table>
+	<thead>
+			<tr>
+					<th>Command</th>
+					<th>Arguments</th>
+					<th>Description</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>list</code> (or <code>ls</code>)</td>
+					<td></td>
+					<td>List users.</td>
+			</tr>
+			<tr>
+					<td><code>show</code></td>
+					<td><code>&lt;username&gt;</code></td>
+					<td>Show user detail.</td>
+			</tr>
+			<tr>
+					<td><code>add</code></td>
+					<td><code>&lt;username&gt; password=&lt;..&gt; [email=.. fullname=.. admin=true service=false]</code></td>
+					<td>Create a user.</td>
+			</tr>
+			<tr>
+					<td><code>edit</code></td>
+					<td><code>&lt;username&gt; &lt;password|email|fullname|admin|service&gt;=&lt;value&gt;</code></td>
+					<td>Edit a single user field.</td>
+			</tr>
+			<tr>
+					<td><code>delete</code> (or <code>rm</code>)</td>
+					<td><code>&lt;username&gt;</code></td>
+					<td>Delete a user, with confirmation.</td>
+			</tr>
+			<tr>
+					<td><code>permissions</code> (or <code>perms</code>)</td>
+					<td><code>&lt;username&gt;</code></td>
+					<td>Show a user&rsquo;s per-environment permissions.</td>
+			</tr>
+	</tbody>
+</table>
+<h5 id="audit">audit</h5>
+<p>Commands for audit logs.</p>
+<table>
+	<thead>
+			<tr>
+					<th>Command</th>
+					<th>Arguments</th>
+					<th>Description</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>list</code> (or <code>ls</code>)</td>
+					<td></td>
+					<td>List audit log entries.</td>
+			</tr>
+	</tbody>
+</table>
+<h5 id="settings">settings</h5>
+<p>Commands for configuration values. These operate directly against the
+configuration store and are available in <code>--db</code> mode.</p>
+<table>
+	<thead>
+			<tr>
+					<th>Command</th>
+					<th>Arguments</th>
+					<th>Description</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>list</code> (or <code>ls</code>)</td>
+					<td></td>
+					<td>List configuration values.</td>
+			</tr>
+			<tr>
+					<td><code>add</code></td>
+					<td><code>&lt;service&gt; &lt;name&gt; &lt;type&gt; &lt;value&gt;</code></td>
+					<td>Add a setting.</td>
+			</tr>
+			<tr>
+					<td><code>update</code></td>
+					<td><code>&lt;service&gt; &lt;name&gt; &lt;type&gt; &lt;value&gt;</code></td>
+					<td>Update a setting.</td>
+			</tr>
+			<tr>
+					<td><code>delete</code> (or <code>rm</code>)</td>
+					<td><code>&lt;service&gt; &lt;name&gt;</code></td>
+					<td>Delete a setting, with confirmation.</td>
+			</tr>
+	</tbody>
+</table>
+<h4 id="run-options">Run options</h4>
+<p><code>set &lt;option&gt; &lt;value&gt;</code> configures the options that <code>run</code> (in the <code>queries</code>
+and <code>carves</code> modules) uses when dispatching a new query or carve. List the
+current values with <code>options</code>. All option values are comma-separated lists
+except <code>hidden</code> (a boolean) and <code>expiration</code> (an integer in hours).</p>
+<table>
+	<thead>
+			<tr>
+					<th>Option</th>
+					<th>Default</th>
+					<th>Meaning</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>env</code></td>
+					<td>first detected env</td>
+					<td>The active environment the query/carve targets.</td>
+			</tr>
+			<tr>
+					<td><code>uuids</code></td>
+					<td><em>empty</em></td>
+					<td>Restrict the query/carve to these node UUIDs.</td>
+			</tr>
+			<tr>
+					<td><code>hosts</code></td>
+					<td><em>empty</em></td>
+					<td>Restrict the query/carve to these hostnames.</td>
+			</tr>
+			<tr>
+					<td><code>platforms</code></td>
+					<td><em>empty</em></td>
+					<td>Restrict the query/carve to these platforms (<code>linux</code>, <code>darwin</code>, <code>windows</code>).</td>
+			</tr>
+			<tr>
+					<td><code>tags</code></td>
+					<td><em>empty</em></td>
+					<td>Restrict the query/carve to nodes with these tags.</td>
+			</tr>
+			<tr>
+					<td><code>hidden</code></td>
+					<td><code>no</code></td>
+					<td>Whether the query is hidden from regular users.</td>
+			</tr>
+			<tr>
+					<td><code>expiration</code></td>
+					<td><code>6</code></td>
+					<td>Hours before the query/carve expires.</td>
+			</tr>
+	</tbody>
+</table>
+<h4 id="example-session">Example session</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>$ ./osctrl-cli shell --db -D db.yml
+</span></span><span style="display:flex;"><span>🛡️  osctrl-cli interactive shell  v0.5.4
+</span></span><span style="display:flex;"><span>📡  db mode
+</span></span><span style="display:flex;"><span>💡  Type &#39;help&#39; or &#39;?&#39; for help · &#39;exit&#39; to quit
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">USAGE</span><span style="color:#f92672">:</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">osctrl-cli</span> <span style="color:#e6db74">query expire [options]</span>
+</span></span><span style="display:flex;"><span>osctrl&gt; show env
+</span></span><span style="display:flex;"><span>Name    UUID   Hostname     Type    Debug  Accept
+</span></span><span style="display:flex;"><span>────────────────────────────────────────────────────
+</span></span><span style="display:flex;"><span>dev     ...    osctrl.net   osquery no     yes
+</span></span><span style="display:flex;"><span>prod    ...    osctrl.net   osquery no     yes
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">OPTIONS</span><span style="color:#f92672">:</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--name</span> <span style="color:#e6db74">string, -n string  Query name to be expired</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--env</span> <span style="color:#e6db74">string, -e string   Environment to be used</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--help,</span> <span style="color:#e6db74">-h                show help</span>
+</span></span><span style="display:flex;"><span>osctrl[dev]&gt; use nodes
+</span></span><span style="display:flex;"><span>-&gt; context: nodes
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">GLOBAL</span> <span style="color:#e6db74">OPTIONS:</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--db,</span> <span style="color:#e6db74">-d                           Connect to local osctrl DB using YAML config file [$DB_CONFIG]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--api,</span> <span style="color:#e6db74">-a                          Connect to remote osctrl using JSON config file [$API_CONFIG]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--api-file</span> <span style="color:#e6db74">FILE, -A FILE           Load API JSON configuration from FILE (default: &#34;osctrl-api.json&#34;) [$API_CONFIG_FILE]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--api-url</span> <span style="color:#e6db74">string, -U string        The URL for osctrl API to be used [$API_URL]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--api-token</span> <span style="color:#e6db74">string, -T string      Token to authenticate with the osctrl API [$API_TOKEN]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--db-file</span> <span style="color:#e6db74">FILE, -D FILE            Load DB YAML configuration from FILE [$DB_CONFIG_FILE]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--db-host</span> <span style="color:#e6db74">string                   Backend host to be connected to (default: &#34;127.0.0.1&#34;) [$DB_HOST]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--db-port</span> <span style="color:#e6db74">int                      Backend port to be connected to (default: 5432) [$DB_PORT]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--db-name</span> <span style="color:#e6db74">string                   Database name to be used in the backend (default: &#34;osctrl&#34;) [$DB_NAME]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--db-user</span> <span style="color:#e6db74">string                   Username to be used for the backend (default: &#34;postgres&#34;) [$DB_USER]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--db-pass</span> <span style="color:#e6db74">string                   Password to be used for the backend (default: &#34;postgres&#34;) [$DB_PASS]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--db-max-idle-conns</span> <span style="color:#e6db74">int            Maximum number of connections in the idle connection pool (default: 20) [$DB_MAX_IDLE_CONNS]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--db-max-open-conns</span> <span style="color:#e6db74">int            Maximum number of open connections to the database (default: 100) [$DB_MAX_OPEN_CONNS]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--db-conn-max-lifetime</span> <span style="color:#e6db74">int         Maximum amount of time a connection may be reused (default: 30) [$DB_CONN_MAX_LIFETIME]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--insecure,</span> <span style="color:#e6db74">-i                     Allow insecure server connections when using SSL</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--verbose,</span> <span style="color:#e6db74">-V                      Increase output verbosity for debugging</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--output-format</span> <span style="color:#e6db74">string, -o string  Format to be used for data output (default: &#34;pretty&#34;) [$OUTPUT_FORMAT]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--silent,</span> <span style="color:#e6db74">-s                       Silent mode</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--version,</span> <span style="color:#e6db74">-v                      Print version information</span>
-</span></span></code></pre></div><h4 id="run-query">Run query</h4>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-properties" data-lang="properties"><span style="display:flex;"><span><span style="color:#a6e22e">$</span> <span style="color:#e6db74">./osctrl-cli query run -h</span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">NAME</span><span style="color:#f92672">:</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">osctrl-cli</span> <span style="color:#e6db74">query run - Start a new on-demand query</span>
+</span></span><span style="display:flex;"><span>osctrl (nodes:dev)&gt; list active
+</span></span><span style="display:flex;"><span>3 active nodes in dev
+</span></span><span style="display:flex;"><span>Hostname   UUID   Platform   Version   Osquery   IP          LastSeen          Status
+</span></span><span style="display:flex;"><span>─────────────────────────────────────────────────────────────────────────────────────
+</span></span><span style="display:flex;"><span>host-01    ...    ubuntu     22.04    5.23.1    10.0.0.21   2026-07-08 09:00  active
+</span></span><span style="display:flex;"><span>...
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">USAGE</span><span style="color:#f92672">:</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">osctrl-cli</span> <span style="color:#e6db74">query run [options]</span>
+</span></span><span style="display:flex;"><span>osctrl (nodes:dev)&gt; back
+</span></span><span style="display:flex;"><span>&lt;- leaving nodes
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">OPTIONS</span><span style="color:#f92672">:</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--query</span> <span style="color:#e6db74">string, -q string                    Query to be issued</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--env</span> <span style="color:#e6db74">string, -e string                      Environment to be used</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--uuid</span> <span style="color:#e6db74">string, -u string                     Node UUID(s) to be used. Comma separated for multiple values</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--host</span> <span style="color:#e6db74">string, --hostname string, -H string  Node hostname(s) to be used. Comma separated for multiple values</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--platform</span> <span style="color:#e6db74">string, -p string                 Node platform(s) to be used. Comma separated for multiple values</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--tag</span> <span style="color:#e6db74">string, -t string                      Tag(s) to be used. Comma separated for multiple values</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--hidden,</span> <span style="color:#e6db74">-x                                 Mark query as hidden</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--expiration</span> <span style="color:#e6db74">int, -E int                     Expiration in hours (0 for no expiration) (default: 6)</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--help,</span> <span style="color:#e6db74">-h                                   show help</span>
+</span></span><span style="display:flex;"><span>osctrl[dev]&gt; use queries
+</span></span><span style="display:flex;"><span>-&gt; context: queries
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">GLOBAL</span> <span style="color:#e6db74">OPTIONS:</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--db,</span> <span style="color:#e6db74">-d                           Connect to local osctrl DB using YAML config file [$DB_CONFIG]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--api,</span> <span style="color:#e6db74">-a                          Connect to remote osctrl using JSON config file [$API_CONFIG]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--api-file</span> <span style="color:#e6db74">FILE, -A FILE           Load API JSON configuration from FILE (default: &#34;osctrl-api.json&#34;) [$API_CONFIG_FILE]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--api-url</span> <span style="color:#e6db74">string, -U string        The URL for osctrl API to be used [$API_URL]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--api-token</span> <span style="color:#e6db74">string, -T string      Token to authenticate with the osctrl API [$API_TOKEN]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--db-file</span> <span style="color:#e6db74">FILE, -D FILE            Load DB YAML configuration from FILE [$DB_CONFIG_FILE]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--db-host</span> <span style="color:#e6db74">string                   Backend host to be connected to (default: &#34;127.0.0.1&#34;) [$DB_HOST]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--db-port</span> <span style="color:#e6db74">int                      Backend port to be connected to (default: 5432) [$DB_PORT]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--db-name</span> <span style="color:#e6db74">string                   Database name to be used in the backend (default: &#34;osctrl&#34;) [$DB_NAME]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--db-user</span> <span style="color:#e6db74">string                   Username to be used for the backend (default: &#34;postgres&#34;) [$DB_USER]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--db-pass</span> <span style="color:#e6db74">string                   Password to be used for the backend (default: &#34;postgres&#34;) [$DB_PASS]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--db-max-idle-conns</span> <span style="color:#e6db74">int            Maximum number of connections in the idle connection pool (default: 20) [$DB_MAX_IDLE_CONNS]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--db-max-open-conns</span> <span style="color:#e6db74">int            Maximum number of open connections to the database (default: 100) [$DB_MAX_OPEN_CONNS]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--db-conn-max-lifetime</span> <span style="color:#e6db74">int         Maximum amount of time a connection may be reused (default: 30) [$DB_CONN_MAX_LIFETIME]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--insecure,</span> <span style="color:#e6db74">-i                     Allow insecure server connections when using SSL</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--verbose,</span> <span style="color:#e6db74">-V                      Increase output verbosity for debugging</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--output-format</span> <span style="color:#e6db74">string, -o string  Format to be used for data output (default: &#34;pretty&#34;) [$OUTPUT_FORMAT]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--silent,</span> <span style="color:#e6db74">-s                       Silent mode</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--version,</span> <span style="color:#e6db74">-v                      Print version information</span>
-</span></span></code></pre></div><h4 id="list-queries">List queries</h4>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-properties" data-lang="properties"><span style="display:flex;"><span><span style="color:#a6e22e">$</span> <span style="color:#e6db74">./osctrl-cli query list -h</span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">NAME</span><span style="color:#f92672">:</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">osctrl-cli</span> <span style="color:#e6db74">query list - List on-demand queries</span>
+</span></span><span style="display:flex;"><span>osctrl (queries:dev)&gt; set expiration 12
+</span></span><span style="display:flex;"><span>expiration = 12
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">USAGE</span><span style="color:#f92672">:</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">osctrl-cli</span> <span style="color:#e6db74">query list [options]</span>
+</span></span><span style="display:flex;"><span>osctrl (queries:dev)&gt; run SELECT name, path FROM processes;
+</span></span><span style="display:flex;"><span>✅ query dispatched in dev
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">OPTIONS</span><span style="color:#f92672">:</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--all,</span> <span style="color:#e6db74">-A                Show all queries</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--active,</span> <span style="color:#e6db74">-a             Show active queries</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--completed,</span> <span style="color:#e6db74">-c          Show completed queries</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--deleted,</span> <span style="color:#e6db74">-d            Show deleted queries</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--hidden,</span> <span style="color:#e6db74">-x             Show hidden queries</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--expired,</span> <span style="color:#e6db74">-E            Show expired queries</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--env</span> <span style="color:#e6db74">string, -e string  Environment to be used</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--help,</span> <span style="color:#e6db74">-h               show help</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">GLOBAL</span> <span style="color:#e6db74">OPTIONS:</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--db,</span> <span style="color:#e6db74">-d                           Connect to local osctrl DB using YAML config file [$DB_CONFIG]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--api,</span> <span style="color:#e6db74">-a                          Connect to remote osctrl using JSON config file [$API_CONFIG]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--api-file</span> <span style="color:#e6db74">FILE, -A FILE           Load API JSON configuration from FILE (default: &#34;osctrl-api.json&#34;) [$API_CONFIG_FILE]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--api-url</span> <span style="color:#e6db74">string, -U string        The URL for osctrl API to be used [$API_URL]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--api-token</span> <span style="color:#e6db74">string, -T string      Token to authenticate with the osctrl API [$API_TOKEN]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--db-file</span> <span style="color:#e6db74">FILE, -D FILE            Load DB YAML configuration from FILE [$DB_CONFIG_FILE]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--db-host</span> <span style="color:#e6db74">string                   Backend host to be connected to (default: &#34;127.0.0.1&#34;) [$DB_HOST]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--db-port</span> <span style="color:#e6db74">int                      Backend port to be connected to (default: 5432) [$DB_PORT]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--db-name</span> <span style="color:#e6db74">string                   Database name to be used in the backend (default: &#34;osctrl&#34;) [$DB_NAME]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--db-user</span> <span style="color:#e6db74">string                   Username to be used for the backend (default: &#34;postgres&#34;) [$DB_USER]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--db-pass</span> <span style="color:#e6db74">string                   Password to be used for the backend (default: &#34;postgres&#34;) [$DB_PASS]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--db-max-idle-conns</span> <span style="color:#e6db74">int            Maximum number of connections in the idle connection pool (default: 20) [$DB_MAX_IDLE_CONNS]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--db-max-open-conns</span> <span style="color:#e6db74">int            Maximum number of open connections to the database (default: 100) [$DB_MAX_OPEN_CONNS]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--db-conn-max-lifetime</span> <span style="color:#e6db74">int         Maximum amount of time a connection may be reused (default: 30) [$DB_CONN_MAX_LIFETIME]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--insecure,</span> <span style="color:#e6db74">-i                     Allow insecure server connections when using SSL</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--verbose,</span> <span style="color:#e6db74">-V                      Increase output verbosity for debugging</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--output-format</span> <span style="color:#e6db74">string, -o string  Format to be used for data output (default: &#34;pretty&#34;) [$OUTPUT_FORMAT]</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--silent,</span> <span style="color:#e6db74">-s                       Silent mode</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">--version,</span> <span style="color:#e6db74">-v                      Print version information</span>
+</span></span><span style="display:flex;"><span>osctrl (queries:dev)&gt; exit
 </span></span></code></pre></div>
 
 
@@ -1538,26 +1910,6 @@
             
                 
                     
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
-                        
-                        
-                    
                 
                 
 
@@ -1589,6 +1941,26 @@
             
             
                 
+                    
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                        
+                        
                     
                 
                 
@@ -1664,10 +2036,10 @@
 	 
 	 
 		
-			<a class="nav nav-prev" href="/usage/osctrl-cli/node/" title="node"> <i class="fa fa-chevron-left"></i></a>
+			<a class="nav nav-prev" href="/usage/osctrl-cli/settings/" title="settings"> <i class="fa fa-chevron-left"></i></a>
 		
 		
-			<a class="nav nav-next" href="/usage/osctrl-cli/settings/" title="settings" style="margin-right: 0px;"><i class="fa fa-chevron-right"></i></a>
+			<a class="nav nav-next" href="/usage/osctrl-cli/tag/" title="tag" style="margin-right: 0px;"><i class="fa fa-chevron-right"></i></a>
 		
 	
     </div>

@@ -21,18 +21,19 @@ DESCRIPTION:
    CLI for osctrl, a fast and efficient osquery management
 
 COMMANDS:
-   audit-logs        Get all audit logs for actions performed in osctrl
-   carve             Commands for file carves
-   check-api         Checks API token
-   check-db          Checks DB connection
-   environment, env  Commands for TLS environment
-   login             Login into API and generate JSON config file with token
-   node              Commands for nodes
-   query             Commands for queries
-   settings          Commands for settings
-   tag               Commands for tags
-   user              Commands for users
-   help, h           Shows a list of commands or help for one command
+   shell, console, interactive, repl  Interactive shell session (Metasploit-style) — access nodes, queries, carves, ...
+   audit-logs                         Get all audit logs for actions performed in osctrl
+   carve                              Commands for file carves
+   check-api                          Checks API token
+   check-db                           Checks DB connection
+   environment, env                   Commands for TLS environment
+   login                              Login into API and generate JSON config file with token
+   node                               Commands for nodes
+   query                              Commands for queries
+   settings                           Commands for settings
+   tag                                Commands for tags
+   user                               Commands for users
+   help, h                            Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
    --db, -d                           Connect to local osctrl DB using YAML config file [$DB_CONFIG]
