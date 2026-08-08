@@ -1,0 +1,142 @@
+/* osctrl.css — maps Starlight's theme onto the osctrl design tokens.
+ *
+ * Source of truth is the frontend: osctrl/frontend/src/styles/tokens.css
+ * and base.css. Same "signal" teal brand, same surfaces, same fonts, so
+ * the docs, the operator UI and osctrl.io all read as one product.
+ */
+
+/* Bai Jamjuree — wordmark font, self-hosted exactly as the frontend does. */
+@font-face {
+  font-family: 'Bai Jamjuree';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/bai-jamjuree-600.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Bai Jamjuree';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/bai-jamjuree-700.woff2') format('woff2');
+}
+
+:root {
+  /* osctrl brand */
+  --osctrl-signal: #2bc4be;
+  --osctrl-signal-bright: #5fe3df;
+  --osctrl-signal-deep: #0a6b66;
+  --osctrl-signal-glow: rgba(43, 196, 190, 0.35);
+
+  --sl-font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --sl-font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+/* ---------- Dark theme (default, matches the frontend) ---------- */
+:root[data-theme='dark'] {
+  --sl-color-accent-low: #0a2b2a;
+  --sl-color-accent: #17817d;
+  --sl-color-accent-high: var(--osctrl-signal-bright);
+
+  --sl-color-white: #ffffff;
+  --sl-color-gray-1: #ecf1f6; /* --text-1 */
+  --sl-color-gray-2: #a6b3c0; /* --text-2 */
+  --sl-color-gray-3: #6a7886; /* --text-3 */
+  --sl-color-gray-4: #2a3845; /* --border-strong */
+  --sl-color-gray-5: #1e2934; /* --border */
+  --sl-color-gray-6: #11171d; /* --bg-2 */
+  --sl-color-black: #07090c;  /* --bg-0 */
+
+  --sl-color-bg: #07090c;         /* --bg-0 */
+  --sl-color-bg-nav: #0c1014;     /* --bg-1 */
+  --sl-color-bg-sidebar: #0c1014; /* --bg-1 */
+  --sl-color-bg-inline-code: #11171d;
+  --sl-color-hairline: #1e2934;
+  --sl-color-hairline-light: #2a3845;
+  --sl-color-text-accent: var(--osctrl-signal);
+}
+
+/* ---------- Light theme (mirrors tokens.css [data-theme="light"]) ---------- */
+:root[data-theme='light'] {
+  --sl-color-accent-low: #d3eceb;
+  --sl-color-accent: #0a8a85;
+  --sl-color-accent-high: #074a48;
+
+  --sl-color-white: #0e1620; /* inverted in light mode */
+  --sl-color-gray-1: #0e1620;
+  --sl-color-gray-2: #495766;
+  --sl-color-gray-3: #7a8694;
+  --sl-color-gray-4: #cfd8de;
+  --sl-color-gray-5: #e2e8ec;
+  --sl-color-gray-6: #f8fafb;
+  --sl-color-gray-7: #f4f7f8;
+  --sl-color-black: #ffffff;
+
+  --sl-color-bg: #ffffff;         /* --bg-1 */
+  --sl-color-bg-nav: #f4f7f8;     /* --bg-0 */
+  --sl-color-bg-sidebar: #f4f7f8;
+  --sl-color-bg-inline-code: #edf1f3;
+  --sl-color-hairline: #e2e8ec;
+  --sl-color-hairline-light: #cfd8de;
+  --sl-color-text-accent: #0a8a85;
+}
+
+/* ---------- Typography ---------- */
+body {
+  font-feature-settings: 'cv11', 'ss01';
+}
+
+/* Space Grotesk for headings, matching the frontend's .font-display */
+.sl-markdown-content h1,
+.sl-markdown-content h2,
+.sl-markdown-content h3,
+.sl-markdown-content h4,
+.content-panel h1,
+h1#_top {
+  font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  letter-spacing: -0.015em;
+}
+
+/* Bai Jamjuree for the site title, matching the frontend's .font-wordmark */
+.site-title,
+a.site-title span {
+  font-family: 'Bai Jamjuree', 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* ---------- Component-page hero images ---------- */
+/* The Hugo pages centered a component diagram above a horizontal rule.
+ * .component-hero reproduces that without inline styles. */
+.component-hero {
+  display: flex;
+  justify-content: center;
+  margin-block: 1.5rem 2rem;
+}
+.component-hero img {
+  width: min(75%, 520px);
+  height: auto;
+}
+
+/* The component diagrams are PNGs with baked-in white backgrounds, drawn
+ * back when the docs were light-only. On dark they read as a torn-out
+ * rectangle, so frame them as a deliberate light panel until the diagrams
+ * are redrawn with transparency. */
+:root[data-theme='dark'] .component-hero img {
+  background: #ffffff;
+  border: 1px solid var(--sl-color-hairline-light);
+  border-radius: 8px;
+  padding: 0.75rem;
+}
+
+/* ---------- Accents ---------- */
+.sl-markdown-content a:not(:where(.not-content *)) {
+  color: var(--sl-color-text-accent);
+  text-underline-offset: 0.2em;
+}
+
+/* Teal glow on the active sidebar entry, echoing the frontend's SideNav */
+:root[data-theme='dark'] a[aria-current='page'] {
+  color: var(--osctrl-signal-bright);
+  box-shadow: inset 2px 0 0 var(--osctrl-signal);
+}

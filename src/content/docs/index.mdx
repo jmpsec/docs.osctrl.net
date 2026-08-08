@@ -1,0 +1,80 @@
+---
+title: Documentation
+description: osctrl is a fast and efficient osquery management solution, implementing its remote API as a TLS endpoint.
+template: splash
+hero:
+  title: osctrl
+  tagline: Fast and efficient osquery management.
+  image:
+    file: ../../assets/osctrl-logo-dark.png
+  actions:
+    - text: Get started
+      link: /deployment/
+      icon: right-arrow
+    - text: View on GitHub
+      link: https://github.com/jmpsec/osctrl
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+## What is **osctrl**?
+
+**osctrl** is a fast and efficient [osquery](https://osquery.io) management
+solution, implementing its
+[remote API](https://osquery.readthedocs.io/en/stable/deployment/remote/) as
+TLS endpoint.
+
+With **osctrl** you are able to:
+
+* Monitor all your systems running osquery,
+* Distribute osquery configuration fast across all your enrolled nodes,
+* Collect all the status and result logs, whether you want to store them or forward them to a different system (Splunk, ELK, Kafka, Graylog...),
+* Run quasi-real-time on-demand queries in your selected enrolled nodes,
+* Carve files or directories from your enrolled nodes.
+
+<figure class="component-hero">
+  <img src="/img/osctrl.png" alt="osctrl" />
+</figure>
+
+**osctrl** has been designed to work as a scalable and reliable solution. It
+has been used successfully in networks from hundreds to hundreds of thousands
+nodes.
+
+Give it a try!
+
+## Where to next
+
+<CardGrid>
+  <LinkCard
+    title="Components"
+    href="/components/"
+    description="How osctrl-tls, osctrl-api, osctrl-cli and the rest fit together."
+  />
+  <LinkCard
+    title="Deployment"
+    href="/deployment/"
+    description="Deploy with Docker, or natively with the provisioning script."
+  />
+  <LinkCard
+    title="Configuration"
+    href="/configuration/"
+    description="The single YAML configuration file used by each service."
+  />
+  <LinkCard
+    title="Usage"
+    href="/usage/"
+    description="Day-to-day use of every osctrl component and the CLI."
+  />
+  <LinkCard
+    title="API reference"
+    href="/openapi/doc.html"
+    description="The osctrl-api OpenAPI reference, rendered with Stoplight Elements."
+  />
+  <LinkCard
+    title="Contributing"
+    href="/contributing/"
+    description="Report bugs, improve these docs, or send a pull request."
+  />
+</CardGrid>
