@@ -13,10 +13,9 @@ Each [component](/components/) of **osctrl** requires configuration in order to 
 
 ## Single YAML Configuration
 
-All osctrl services ([osctrl-tls](/components/osctrl-tls/), [osctrl-admin](/components/osctrl-admin/), [osctrl-api](/components/osctrl-api/)) now use a unified YAML configuration file that includes all necessary settings in one place. The default filenames are:
+All osctrl services ([osctrl-tls](/components/osctrl-tls/) and [osctrl-api](/components/osctrl-api/)) now use a unified YAML configuration file that includes all necessary settings in one place. The default filenames are:
 
 * `tls.yaml` for [osctrl-tls](/components/osctrl-tls/)
-* `admin.yaml` for [osctrl-admin](/components/osctrl-admin/)
 * `api.yaml` for [osctrl-api](/components/osctrl-api/)
 
 You can specify a different configuration file using the `--config-file` or `-C` flag.
@@ -31,11 +30,10 @@ To generate a valid YAML configuration file with default values:
 
 ```bash
 ./osctrl-tls config-generate -f tls.yaml
-./osctrl-admin config-generate -f admin.yaml
 ./osctrl-api config-generate -f api.yaml
 ```
 
-This will create configuration files (`tls.yaml`, `admin.yaml`, `api.yaml`) populated with all required fields and default settings. If not using `-f`, the file will be created in `config/<service>.yml` by default.
+This will create configuration files (`tls.yaml`, `api.yaml`) populated with all required fields and default settings. If not using `-f`, the file will be created in `config/<service>.yml` by default.
 
 The generated configuration includes:
 
@@ -49,7 +47,6 @@ To validate an existing configuration file before starting the service:
 
 ```bash
 ./osctrl-tls config-verify --file tls.yaml
-./osctrl-admin config-verify --file admin.yaml
 ./osctrl-api config-verify --file api.yaml
 ```
 
@@ -392,79 +389,12 @@ debug:
   showBody: false
 ```
 
-#### osctrl-admin (admin.yaml)
-
-```yaml
-service:
-  listener: "0.0.0.0"
-  port: "9001"
-  host: "admin.example.com"
-  auth: "db"
-  logLevel: "info"
-  logFormat: "json"
-  auditLog: true
-
-db:
-  type: "postgres"
-  host: "127.0.0.1"
-  port: "5432"
-  name: "osctrl"
-  username: "postgres"
-  password: "postgres"
-  sslmode: "disable"
-  maxIdleConns: 20
-  maxOpenConns: 100
-  connMaxLifetime: 30
-  connRetry: 5
-
-redis:
-  host: "127.0.0.1"
-  port: "6379"
-  password: ""
-  db: 0
-  connRetry: 5
-
-logger:
-  type: "db"
-  loggerDBSame: true
-
-carver:
-  type: "local"
-  local:
-    carvesDir: "/var/osctrl/carves"
-
-tls:
-  termination: false
-
-osquery:
-  version: "5.12.1"
-  tablesFile: "data/5.12.1.json"
-
-jwt:
-  jwtSecret: "change-this-secret"
-  hoursToExpire: 3
-
-admin:
-  sessionKey: "change-this-session-key"
-  staticDir: "static"
-  staticOffline: false
-  templatesDir: "tmpl_admin"
-  backgroundImage: "static/img/circuit.svg"
-  brandingImage: "static/img/brand.png"
-
-debug:
-  enableHTTP: false
-  httpFile: "debug-http-admin.log"
-  showBody: false
-```
-
 ### Command-Line Flags
 
 All configuration values can be overridden using command-line flags. Use `--help` or `-h` to see all available flags for each service:
 
 ```bash
 $ ./osctrl-tls --help
-$ ./osctrl-admin --help
 $ ./osctrl-api --help
 ```
 

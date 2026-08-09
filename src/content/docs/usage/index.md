@@ -1,6 +1,6 @@
 ---
 title: "Usage"
-description: "How to use each osctrl component: osctrl-tls, osctrl-admin, osctrl-api, osctrl-cli, osctrld and the provisioning script."
+description: "How to use each osctrl component: osctrl-tls, osctrl-api, osctrl-cli, osctrld and the provisioning script."
 sidebar:
   order: 4
 ---

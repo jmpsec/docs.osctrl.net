@@ -12,8 +12,8 @@ sidebar:
 The metrics component of **osctrl** provides instrumentation for the following operations:
 
 * Receiving requests to osctrl-tls,
-* Receiving requests to osctrl-admin,
-* Generating errors during normal operations both in osctrl-tls and osctrl-admin.
+* Receiving requests to osctrl-api,
+* Generating errors during normal operations in osctrl-tls and osctrl-api.
 
 :::note
 If the number of enrolled nodes is large enough, these metrics will generate valuable data to assess the performance of **osctrl**.
