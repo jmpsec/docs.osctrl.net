@@ -86,6 +86,30 @@ body {
   font-feature-settings: 'cv11', 'ss01';
 }
 
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-color: rgba(43, 196, 190, 0.045);
+  -webkit-mask-image:
+    url('/img/circuit.svg'),
+    linear-gradient(to bottom, #000 0%, #000 78%, transparent 100%);
+  mask-image:
+    url('/img/circuit.svg'),
+    linear-gradient(to bottom, #000 0%, #000 78%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+  -webkit-mask-repeat: repeat, no-repeat;
+  mask-repeat: repeat, no-repeat;
+  -webkit-mask-size: 220px 220px, cover;
+  mask-size: 220px 220px, cover;
+}
+
+:root[data-theme='light'] body::before {
+  background-color: rgba(10, 138, 133, 0.075);
+}
+
 /* Space Grotesk for headings, matching the frontend's .font-display */
 .sl-markdown-content h1,
 .sl-markdown-content h2,
