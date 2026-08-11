@@ -18,6 +18,7 @@ Diagram of all the osctrl components in action.
 | --- | --- |
 | [osctrl-tls](/components/osctrl-tls/) | TLS endpoint implementing the osquery remote API |
 | [osctrl-api](/components/osctrl-api/) | REST API for nodes and for osctrl itself |
+| [osctrl-frontend](/components/osctrl-frontend/) | Browser operator interface backed by osctrl-api |
 | [osctrl-cli](/components/osctrl-cli/) | Command line interface for automation |
 | [nginx](/components/nginx/) | TLS termination and load balancing |
 | [Backend](/components/backend/) | Centralized storage for all osctrl data |

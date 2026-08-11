@@ -60,6 +60,7 @@ export default defineConfig({
             { slug: 'components', label: 'Overview' },
             'components/osctrl-tls',
             'components/osctrl-api',
+            'components/osctrl-frontend',
             'components/osctrl-cli',
             'components/nginx',
             'components/backend',
