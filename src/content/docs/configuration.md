@@ -20,6 +20,8 @@ All osctrl services ([osctrl-tls](/components/osctrl-tls/) and [osctrl-api](/com
 
 You can specify a different configuration file using the `--config-file` or `-C` flag.
 
+Only the `service`, `db` and `redis` sections are required — every other section (`rateLimits`, `osquery`, `saml`, `oidc`, `jwt`, `tls`, `logger`, `carver`, `debug`, and the osctrl-tls-only `batchWriter`, `configEndpoints`, `osctrld`, `metrics`) can be omitted entirely and the service falls back to its built-in defaults, or to values already stored in the database.
+
 ### Generating and Validating Configuration
 
 Each osctrl binary includes built-in commands to help you create and validate configuration files:
@@ -81,16 +83,31 @@ service:
   auth: "none"                      # Authentication method
   logLevel: "info"                  # Logging level: debug, info, warn, error
   logFormat: "json"                 # Log format: json, console
-  auditLog: false                   # Enable audit logging for sensitive actions
+  serviceConfigEnabled: false        # osctrl-api only: expose /service-config API + frontend UI
+  mfaRequired: false                 # osctrl-api only: require MFA for password logins
+  mfaIssuer: ""                      # Authenticator app label; empty uses "osctrl (<host>)"
+  mfaRPID: ""                        # WebAuthn Relying Party ID; empty uses `host`
+  mfaOrigins: ""                     # Comma-separated origins allowed for WebAuthn ceremonies
+  auditLog: true                    # Enable audit logging for sensitive actions
+  trustedProxies: ""                 # CIDR list trusted for X-Forwarded-For/X-Real-IP
+  geoipDBPath: ""                    # Path to a GeoLite2-Country .mmdb for node IP geolocation
+  postureEnabled: false              # Enable security & compliance posture collection
+  postureQueryPrefix: "osctrl:posture:" # Scheduled-query name prefix ingested as posture data
+  dbHealthCheck: false               # Enable DB health monitor / stale-serve mode on outages
+  dbHealthInterval: 5                # Seconds between DB health pings
+  dbHealthThreshold: 3               # Consecutive failures before entering stale-serve mode
 ```
 
 **Authentication types** (`auth`):
 
-* `none` - No authentication
-* `db` - Users stored and retrieved from backend database
-* `saml` - SAML-based authentication
-* `headers` - Header-based authentication (middleware approach)
-* `jwt` - JWT token-based authentication
+* `none` - No authentication. For [osctrl-tls](/components/osctrl-tls/) this is the only valid value — osquery nodes authenticate with their enroll secret and `node_key` instead. For [osctrl-api](/components/osctrl-api/), `none` requires `OSCTRL_INSECURE_NO_AUTH=1` in the environment and is intended for local development only, since it impersonates a super-admin on every request.
+* `jwt` - JWT token-based authentication (osctrl-api). The only supported value for production deployments.
+
+SAML and OIDC federated login are configured independently of `auth`, via the `saml.enabled` and `oidc.enabled` switches — the frontend discovers which methods are available through `GET /api/v1/auth/methods` and can offer JWT, SAML and OIDC login side by side.
+
+**MFA** (`mfaRequired` and friends) adds a second factor — an authenticator app (TOTP) or a WebAuthn passkey/security key — to password logins on osctrl-api. When `mfaRequired: true`, users without an enrolled factor are sent to enrollment on their next login instead of being locked out; service accounts (token auth) and federated SAML/OIDC logins are unaffected. Users can always enroll a factor voluntarily from their profile page regardless of this setting.
+
+`serviceConfigEnabled`, MFA and posture fields also appear under `service:` in `tls.yaml`, but only `osctrl-api` acts on them — they're kept in both files so the shared `service` section round-trips through the [Service Configuration API](#service-configuration-api-and-restart).
 
 #### Database Configuration
 
@@ -125,6 +142,40 @@ redis:
   connectionString: ""              # Optional: full connection string
   connRetry: 5                      # Connection retry timeout (seconds)
 ```
+
+#### Rate Limits Configuration
+
+HTTP rate limiting, shared by both services but enforced per endpoint:
+
+```yaml
+rateLimits:
+  login:                            # Password/SSO login attempts (osctrl-api)
+    burst: 10                       # Tokens available immediately
+    period: 1m                      # Refill window
+    evictAfter: 10m                 # Idle client buckets are evicted after this
+    retryAfter: 60                  # Retry-After response header, in seconds
+    maxBuckets: 0                   # Max tracked client buckets; 0 = internal default
+  preAuth:                          # Pre-auth discovery routes (osctrl-api)
+    burst: 60
+    period: 1m
+    evictAfter: 10m
+    retryAfter: 60
+    maxBuckets: 0
+  serviceConfigApply:               # POST /service-config/apply restart requests (osctrl-api)
+    burst: 3
+    period: 10m
+    evictAfter: 30m
+    retryAfter: 60
+    maxBuckets: 0
+  enroll:                           # osquery enroll attempts (osctrl-tls)
+    burst: 20
+    period: 1m
+    evictAfter: 10m
+    retryAfter: 60
+    maxBuckets: 0
+```
+
+`osctrl-api` only enforces `login`, `preAuth` and `serviceConfigApply`; `osctrl-tls` only enforces `enroll`. Every limiter still has to appear in both `tls.yaml` and `api.yaml` so the section has one shared shape and can round-trip through the [Service Configuration API](#service-configuration-api-and-restart) — the values the other service doesn't use are simply ignored.
 
 #### Logger Configuration
 
@@ -234,7 +285,14 @@ osquery:
   config: true                      # Enable remote TLS config endpoint
   query: true                       # Enable remote TLS query endpoints
   carve: true                       # Enable remote TLS carver endpoints
+  accelerated: false                # Enable accelerated query polling
+  console: false                    # Enable the per-node interactive console
+  fileExplorer: false                # Enable the per-node file explorer (requires query: true)
+  readOnly: false                   # Prevent operator-driven osquery configuration changes
 ```
+
+* `console` gates the per-node interactive console (reachable from the node detail page in [osctrl-frontend](/components/osctrl-frontend/)): on osctrl-api it controls whether the feature is advertised and its routes registered (also requires `query: true`); on osctrl-tls it controls whether active console sessions can request accelerated query polling.
+* `fileExplorer` behaves the same way for the per-node file explorer, and no longer requires `accelerated: true` — only `query: true`.
 
 #### Metrics Configuration
 
@@ -245,20 +303,6 @@ metrics:
   enabled: false                    # Enable Prometheus metrics
   listener: "0.0.0.0"
   port: "9090"
-```
-
-#### Admin UI Configuration
-
-Admin service-specific settings:
-
-```yaml
-admin:
-  sessionKey: "your-session-key"    # Secret key for session cookies
-  staticDir: "/path/to/static"      # Static files directory
-  staticOffline: false              # Use offline static files
-  templatesDir: "/path/to/templates"
-  backgroundImage: "/path/to/background.svg"
-  brandingImage: "/path/to/brand.png"
 ```
 
 #### JWT Configuration
@@ -273,19 +317,23 @@ jwt:
 
 #### SAML Configuration
 
-SAML authentication settings (Admin service):
+SAML 2.0 federated login for `osctrl-api`, disabled by default. When `enabled: true`, the API fetches the IdP metadata at startup and refuses to start if that fails; the frontend discovers the method via `GET /api/v1/auth/methods` and shows a "Continue with SAML" button automatically:
 
 ```yaml
 saml:
-  certPath: "/path/to/saml-cert.pem"
-  keyPath: "/path/to/saml-key.pem"
+  enabled: false                    # Enable SAML routes
+  entityId: ""                      # SP entity ID, conventionally the metadata URL
+  acsUrl: ""                        # Where the IdP POSTs the SAMLResponse (must end with /api/v1/auth/saml/acs)
   metadataUrl: "https://idp.example.com/metadata"
-  rootUrl: "https://admin.example.com"
-  loginUrl: "https://admin.example.com/login"
-  logoutUrl: "https://admin.example.com/logout"
-  jitProvision: true                # Just-in-time user provisioning
-  spInitiated: false                # Service Provider initiated flow
+  logoutUrl: "https://idp.example.com/logout" # IdP session-termination URL, used on logout
+  jitProvision: false                # Just-in-time user provisioning, as non-admin
+  usernameAttribute: ""              # SAML attribute mapped to the osctrl username
+  signingCertPath: ""                # PEM cert + key for signing outbound AuthnRequests
+  signingKeyPath: ""
+  forceAuthn: true                   # Force re-authentication at the IdP on every login
 ```
+
+Register osctrl with the IdP by pointing it at the SP metadata URL: `https://<host>/api/v1/auth/saml/metadata`. The `certPath`, `keyPath`, `rootUrl`, `loginUrl` and `spInitiated` fields are legacy, consumed only by the retired `osctrl-admin` service, and ignored by `osctrl-api`.
 
 #### Osctrld Configuration
 
@@ -317,6 +365,13 @@ debug:
   httpFile: "debug-http.log"        # File to dump HTTP requests
   showBody: false                   # Include request body in dumps
 ```
+
+### Service Configuration API and Restart
+
+Set `service.serviceConfigEnabled: true` (`osctrl-api` only) to expose `/api/v1/service-config` and show the **Service Config** section in [osctrl-frontend](/components/osctrl-frontend/). Once enabled, operators can review and edit any of the sections above from the UI, persisted to the `service_config` table in the backend database.
+
+* This switch only gates the read/edit/apply UI and API surface. Configuration is always resolved the same way at every boot: the YAML file's sections are seeded into `service_config`, and the stored rows are then resolved back over them — so the service always runs on the stored values, whether or not the API is enabled.
+* Edited values can be written back to the on-disk YAML file, and a restart of `osctrl-tls` can be requested from `osctrl-api` (rate limited by `rateLimits.serviceConfigApply`) so it picks up the new values. The frontend shows a confirmation warning before requesting a restart, since it can disrupt in-flight osquery traffic.
 
 ### Example Configuration Files
 
@@ -351,6 +406,14 @@ redis:
   db: 0
   connRetry: 5
 
+rateLimits:
+  enroll:
+    burst: 20
+    period: 1m
+    evictAfter: 10m
+    retryAfter: 60
+    maxBuckets: 0
+
 logger:
   type: "db"
   loggerDBSame: true
@@ -369,6 +432,10 @@ osquery:
   config: true
   query: true
   carve: true
+  accelerated: false
+  console: false
+  fileExplorer: false
+  readOnly: false
 
 metrics:
   enabled: true
@@ -407,6 +474,10 @@ Common flags:
 * `--redis-host`: Redis host
 * `--listener` or `-l`: Service listener
 * `--port` or `-p`: Service port
+* `--service-config-enabled`: Expose the service configuration API/frontend (`osctrl-api` only)
+* `--mfa-required`, `--mfa-issuer`, `--mfa-rpid`, `--mfa-origins`: MFA settings (`osctrl-api` only)
+* `--osquery-console`: Enable the per-node interactive console
+* `--rate-limit-<name>-burst`, `--rate-limit-<name>-period`, `--rate-limit-<name>-evict-after`, `--rate-limit-<name>-retry-after`, `--rate-limit-<name>-max-buckets`: Rate limit tuning, where `<name>` is `login`, `pre-auth`, `service-config-apply` (`osctrl-api`) or `enroll` (`osctrl-tls`)
 
 ### Environment Variables
 
