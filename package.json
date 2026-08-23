@@ -13,7 +13,8 @@
   },
   "dependencies": {
     "@astrojs/starlight": "^0.41.7",
-    "astro": "^7.2.0"
+    "astro": "^7.2.0",
+    "starlight-openapi": "^0.26.1"
   },
   "allowScripts": {
     "sharp@0.34.5": true,

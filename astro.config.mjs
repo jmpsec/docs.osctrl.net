@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import starlightOpenAPI, { openAPISidebarGroups } from 'starlight-openapi';
 
 // https://astro.build/config
 export default defineConfig({
@@ -16,6 +17,15 @@ export default defineConfig({
       },
       favicon: '/favicon.svg',
       customCss: ['./src/styles/osctrl.css'],
+      plugins: [
+        starlightOpenAPI([
+          {
+            base: 'api',
+            label: 'osctrl-api (OpenAPI)',
+            schema: 'https://raw.githubusercontent.com/jmpsec/osctrl/master/osctrl-api.yaml',
+          },
+        ]),
+      ],
       // Inter / Space Grotesk / IBM Plex Mono, the same three families the
       // frontend uses. Bai Jamjuree is self-hosted from public/fonts/.
       head: [
@@ -113,16 +123,7 @@ export default defineConfig({
           label: '5. Contributing',
           items: ['contributing'],
         },
-        {
-          label: 'API reference',
-          items: [
-            {
-              label: 'osctrl-api (OpenAPI)',
-              link: '/openapi/doc.html',
-              attrs: { target: '_blank' },
-            },
-          ],
-        },
+        ...openAPISidebarGroups,
       ],
       lastUpdated: true,
     }),
