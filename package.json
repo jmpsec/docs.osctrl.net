@@ -16,9 +16,12 @@
     "astro": "^7.2.0",
     "starlight-openapi": "^0.26.1"
   },
+  "overrides": {
+    "form-data": "4.0.6"
+  },
   "allowScripts": {
     "sharp@0.34.5": true,
     "fsevents@2.3.3": true,
-    "esbuild@0.28.1": true
+    "esbuild@0.28.2": true
   }
 }
