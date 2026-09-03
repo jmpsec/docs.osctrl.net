@@ -22,7 +22,7 @@ export default defineConfig({
           {
             base: 'api',
             label: 'osctrl-api (OpenAPI)',
-            schema: 'https://raw.githubusercontent.com/jmpsec/osctrl/master/osctrl-api.yaml',
+            schema: './public/osctrl-api.yaml',
           },
         ]),
       ],
