@@ -22,6 +22,8 @@ You can specify a different configuration file using the `--config-file` or `-C`
 
 Only the `service`, `db` and `redis` sections are required — every other section (`rateLimits`, `osquery`, `saml`, `oidc`, `jwt`, `tls`, `logger`, `carver`, `debug`, and the osctrl-tls-only `batchWriter`, `configEndpoints`, `osctrld`, `metrics`) can be omitted entirely and the service falls back to its built-in defaults, or to values already stored in the database.
 
+Every generated config file also starts with a top-level `version: 1` field — the configuration schema version the file targets. It's checked against the version the running binary supports: an older or missing `version` logs a startup warning that fields added since may be missing, and a newer one warns that this binary ignores fields it doesn't know about. It's never fatal, just a heads-up to compare against a fresh `config-generate` output.
+
 ### Generating and Validating Configuration
 
 Each osctrl binary includes built-in commands to help you create and validate configuration files:
@@ -76,6 +78,8 @@ The YAML configuration file contains the following main sections:
 Basic service settings including network listener, ports, authentication, and logging:
 
 ```yaml
+version: 1                          # Configuration schema version
+
 service:
   listener: "0.0.0.0"               # Network interface to bind to
   port: "9000"                      # TCP port for the service
@@ -84,6 +88,9 @@ service:
   logLevel: "info"                  # Logging level: debug, info, warn, error
   logFormat: "json"                 # Log format: json, console
   serviceConfigEnabled: false        # osctrl-api only: expose /service-config API + frontend UI
+  logSinksEnabled: true               # Expose the log sinks API + frontend section
+  authProvidersEnabled: true          # Expose the auth providers API + frontend section
+  alertsEnabled: false                 # Enable the alerting subsystem (routes, tables, ingest)
   mfaRequired: false                 # osctrl-api only: require MFA for password logins
   mfaIssuer: ""                      # Authenticator app label; empty uses "osctrl (<host>)"
   mfaRPID: ""                        # WebAuthn Relying Party ID; empty uses `host`
@@ -98,6 +105,9 @@ service:
   dbHealthThreshold: 3               # Consecutive failures before entering stale-serve mode
 ```
 
+* `logSinksEnabled` and `authProvidersEnabled` default to `true` and gate the newer [Log Sinks](/components/osctrl-frontend/#log-sinks) and [Auth Providers](/components/osctrl-frontend/#auth-providers) API routes and frontend sections, independently of `serviceConfigEnabled`.
+* `alertsEnabled` defaults to `false` (unlike the two above) and gates the [Alerts](/components/osctrl-frontend/#alerts) subsystem end to end: with it off, no alert tables are created, no routes are registered, and there's no ingest overhead. **Changing it requires a service restart** — both `osctrl-api` and `osctrl-tls` wire their alert routes/ingest hooks at boot.
+
 **Authentication types** (`auth`):
 
 * `none` - No authentication. For [osctrl-tls](/components/osctrl-tls/) this is the only valid value — osquery nodes authenticate with their enroll secret and `node_key` instead. For [osctrl-api](/components/osctrl-api/), `none` requires `OSCTRL_INSECURE_NO_AUTH=1` in the environment and is intended for local development only, since it impersonates a super-admin on every request.
@@ -108,6 +118,8 @@ SAML and OIDC federated login are configured independently of `auth`, via the `s
 **MFA** (`mfaRequired` and friends) adds a second factor — an authenticator app (TOTP) or a WebAuthn passkey/security key — to password logins on osctrl-api. When `mfaRequired: true`, users without an enrolled factor are sent to enrollment on their next login instead of being locked out; service accounts (token auth) and federated SAML/OIDC logins are unaffected. Users can always enroll a factor voluntarily from their profile page regardless of this setting.
 
 `serviceConfigEnabled`, MFA and posture fields also appear under `service:` in `tls.yaml`, but only `osctrl-api` acts on them — they're kept in both files so the shared `service` section round-trips through the [Service Configuration API](#service-configuration-api-and-restart).
+
+With `postureEnabled: true`, individual posture checks no longer have to be pulled out of a built-in profile wholesale — a **Posture** tab on the environment config page in [osctrl-frontend](/components/osctrl-frontend/) lists the `osctrl:posture:`-prefixed scheduled queries for that environment and lets an operator add or remove individual checks directly.
 
 #### Database Configuration
 
@@ -142,6 +154,10 @@ redis:
   connectionString: ""              # Optional: full connection string
   connRetry: 5                      # Connection retry timeout (seconds)
 ```
+
+:::tip
+If the service refuses to start with a Redis `AUTH` error, check that `redis.password` (or credentials embedded in `redis.connectionString`) actually matches what Redis is configured with — a password set on the osctrl side against a Redis server with no password configured is a common misconfiguration and now surfaces a specific "redis auth rejected" error instead of a generic connection failure.
+:::
 
 #### Rate Limits Configuration
 
@@ -236,6 +252,12 @@ logger:
 * `logstash` - Send logs to Logstash
 * `elastic` - Send logs directly to Elasticsearch
 
+### Log Sinks
+
+The `logger:` YAML section above is no longer read directly at every boot — it's now only a **seed source**. On first boot, `osctrl-tls` creates one row per entry in `logger.types` (or `logger.type`) in a `log_sinks` database table; from then on, that table — not the YAML file — is what actually drives log export, and it's managed live through the [Log Sinks section](/components/osctrl-frontend/#log-sinks) in [osctrl-frontend](/components/osctrl-frontend/) or the `/api/v1/log-sinks` API, gated by `service.logSinksEnabled` (default `true`).
+
+This means an operator can now run multiple sinks at once, enable/disable each independently, scope sinks per environment, and route specific data categories (`status`, `result`, `query`, `carve.meta`, `carve.data`) to specific sinks — none of which was possible with a single `logger.type`/`types` YAML value alone. Editing the YAML and restarting still works (it just reseeds any sink that hasn't been edited through the API), but a sink edited through the UI is marked `source: db` and from then on ignores further YAML changes for that sink until it's deleted or explicitly reverted.
+
 #### Carver Configuration
 
 File carving storage settings:
@@ -327,13 +349,20 @@ saml:
   metadataUrl: "https://idp.example.com/metadata"
   logoutUrl: "https://idp.example.com/logout" # IdP session-termination URL, used on logout
   jitProvision: false                # Just-in-time user provisioning, as non-admin
+  linkLocalAccounts: false            # Let this identity claim an existing local password account with the same username
   usernameAttribute: ""              # SAML attribute mapped to the osctrl username
   signingCertPath: ""                # PEM cert + key for signing outbound AuthnRequests
   signingKeyPath: ""
   forceAuthn: true                   # Force re-authentication at the IdP on every login
 ```
 
-Register osctrl with the IdP by pointing it at the SP metadata URL: `https://<host>/api/v1/auth/saml/metadata`. The `certPath`, `keyPath`, `rootUrl`, `loginUrl` and `spInitiated` fields are legacy, consumed only by the retired `osctrl-admin` service, and ignored by `osctrl-api`.
+Register osctrl with the IdP by pointing it at the SP metadata URL: `https://<host>/api/v1/auth/saml/metadata`. The `certPath`, `keyPath`, `rootUrl`, `loginUrl` and `spInitiated` fields are legacy, consumed only by the retired `osctrl-admin` service, and ignored by `osctrl-api`. OIDC has the equivalent `oidc.linkLocalAccounts` field.
+
+By default, a federated login whose resolved username matches an **existing local password account** is refused, not silently merged — otherwise anyone who can make the IdP assert a given username (e.g. `admin`) could inherit that account's privileges. Set `linkLocalAccounts: true` on the provider to let it adopt pre-created local accounts (it never grants extra privileges — a non-admin local account stays non-admin). Accounts *created by* federated login are always matched, including across protocols.
+
+Usernames resolved from a SAML attribute or OIDC claim accept either a plain handle (`^[a-zA-Z0-9_-]{1,64}$`) or an email address (stored lowercased). An `email` claim/attribute is only accepted when the IdP also asserts it's verified; otherwise login falls back to the provider's subject identifier. See [Auth providers](/usage/auth-providers/) for the full OIDC/SAML environment variable reference, account-linking details, and per-IdP setup notes (Keycloak, Auth0, Okta, Entra ID).
+
+A new **Auth Providers** management layer, gated by `service.authProvidersEnabled` (default `true`), lets an operator review, test, and edit these SAML/OIDC settings from [osctrl-frontend](/components/osctrl-frontend/#auth-providers) or the `/api/v1/auth-providers` API instead of only through this YAML file — see that section for what it currently does and does not change about how login actually works.
 
 #### Osctrld Configuration
 
@@ -378,6 +407,8 @@ Set `service.serviceConfigEnabled: true` (`osctrl-api` only) to expose `/api/v1/
 #### osctrl-tls (tls.yaml)
 
 ```yaml
+version: 1
+
 service:
   listener: "0.0.0.0"
   port: "9000"
@@ -475,6 +506,9 @@ Common flags:
 * `--listener` or `-l`: Service listener
 * `--port` or `-p`: Service port
 * `--service-config-enabled`: Expose the service configuration API/frontend (`osctrl-api` only)
+* `--log-sinks-enabled`: Expose the log sinks API/frontend (default `true`)
+* `--auth-providers-enabled`: Expose the auth providers API/frontend (default `true`)
+* `--alerts-enabled`: Enable the alerting subsystem (default `false`, requires a restart to change)
 * `--mfa-required`, `--mfa-issuer`, `--mfa-rpid`, `--mfa-origins`: MFA settings (`osctrl-api` only)
 * `--osquery-console`: Enable the per-node interactive console
 * `--rate-limit-<name>-burst`, `--rate-limit-<name>-period`, `--rate-limit-<name>-evict-after`, `--rate-limit-<name>-retry-after`, `--rate-limit-<name>-max-buckets`: Rate limit tuning, where `<name>` is `login`, `pre-auth`, `service-config-apply` (`osctrl-api`) or `enroll` (`osctrl-tls`)

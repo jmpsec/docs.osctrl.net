@@ -96,11 +96,13 @@ export default defineConfig({
             { slug: 'usage', label: 'Overview' },
             'usage/osctrl-tls',
             'usage/osctrl-api',
+            'usage/auth-providers',
             {
               label: 'osctrl-cli',
               collapsed: true,
               items: [
                 { slug: 'usage/osctrl-cli', label: 'Overview' },
+                'usage/osctrl-cli/alert',
                 'usage/osctrl-cli/audit-logs',
                 'usage/osctrl-cli/carve',
                 'usage/osctrl-cli/check-api',
@@ -112,6 +114,7 @@ export default defineConfig({
                 'usage/osctrl-cli/settings',
                 'usage/osctrl-cli/shell',
                 'usage/osctrl-cli/tag',
+                'usage/osctrl-cli/tui',
                 'usage/osctrl-cli/user',
               ],
             },

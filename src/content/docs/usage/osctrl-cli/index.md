@@ -22,7 +22,9 @@ DESCRIPTION:
 
 COMMANDS:
    shell, console, interactive, repl  Interactive shell session (Metasploit-style) — access nodes, queries, carves, ...
+   tui, dashboard                     Full-screen TUI dashboard — fleet health, platforms, environments, queries, audit
    audit-logs                         Get all audit logs for actions performed in osctrl
+   alert                              Commands for the alerting system
    carve                              Commands for file carves
    check-api                          Checks API token
    check-db                           Checks DB connection

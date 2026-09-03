@@ -12,6 +12,10 @@ sidebar:
 
 Its purpose is to install all necessary components to deploy **osctrl** in an Ubuntu 20.04 system, although it could be easily adapted to work in CentOS 7.
 
+:::note
+`provision.sh` also detects and provisions Ubuntu 22.04, 24.04 and 26.04, installing the matching PostgreSQL release for each: 22.04 → PostgreSQL 14, 24.04 → PostgreSQL 16, 26.04 → PostgreSQL 18. No parameters changed for this — it's automatic based on the running OS version.
+:::
+
 Execute `./deploy/provision.sh [-h|--help]` to show the usage of the script:
 
 ```properties

@@ -69,7 +69,7 @@ you at the top-level prompt. The prompt reflects the active environment and,
 when you are inside a module, the module context:
 
 ```text
-🛡️  osctrl-cli interactive shell  v0.5.6
+🛡️  osctrl-cli interactive shell  v0.5.8
 📡  db mode
 💡  Type 'help' or '?' for help · 'exit' to quit
 
@@ -90,7 +90,7 @@ These are available from the top level and from inside any module:
 | Command | Description |
 |---|---|
 | `help` (or `?`) | Show help for the current context. At the top level it lists every module; inside a module it lists that module's commands. |
-| `use <module>` | Enter a module context (`nodes`, `queries`, `carves`, `environments`, `tags`, `users`, `audit`, `settings`). |
+| `use <module>` | Enter a module context (`nodes`, `queries`, `saved`, `carves`, `console`, `file-explorer`, `posture`, `environments`, `tags`, `users`, `audit`, `settings`). |
 | `back` | Leave the current module context and return to the top level. |
 | `set env <name>` | Set the active environment all modules operate against. |
 | `set <option> <value>` | Set a run option used by `run` (see [Run options](#run-options)). |
@@ -112,7 +112,11 @@ Type `help` at the top level to see the available modules:
 Modules (use <module>):
   🖥️  nodes         enrolled osquery nodes
   🔍  queries       on-demand distributed queries
+  💾  saved         saved queries + template library
   📦  carves        file carves
+  ⌨️  console       live interactive node console
+  🗂️  file-explorer live remote file explorer
+  🛡️  posture       node posture + compliance scoring
   🌐  environments  TLS environments
   🏷️  tags          node tags
   👤  users         users and permissions
@@ -138,8 +142,23 @@ Commands for enrolled osquery nodes in the active environment.
 | `list` (or `ls`) | `[active\|inactive\|all]` | List nodes (default: `all`). |
 | `search` | `<query>` | Search nodes by hostname/uuid/ip/localname/username. |
 | `show` | `<uuid\|hostname>` | Show full node detail. |
+| `logs` | `<uuid\|hostname> [result\|status]` | Show recent logs for a node (default: `result`, `--api` mode only). |
 | `delete` (or `rm`) | `<uuid>` | Delete (archive) a node, with confirmation. |
 | `tag` | `<uuid> <tag>` | Apply a tag to a node. |
+
+### saved
+
+Commands for the saved-query and template library in the active environment.
+
+| Command | Arguments | Description |
+|---|---|---|
+| `list` (or `ls`) | | List saved queries in the active env. |
+| `show` | `<name>` | Show a saved query. |
+| `save` | `<name> <sql>` | Save a new query. |
+| `update` | `<name> <sql>` | Update a saved query's body. |
+| `delete` (or `rm`) | `<name>` | Delete a saved query, with confirmation. |
+| `run` | `<name>` | Dispatch a saved query using the active [run options](#run-options). |
+| `samples` | | Browse the built-in query template library. |
 
 ### queries
 
@@ -170,6 +189,36 @@ Commands for file carves in the active environment.
 | `expire` | `<name>` | Expire a carve. |
 | `delete` (or `rm`) | `<name>` | Delete a carve, with confirmation. |
 | `options` | | Show the current run options. |
+
+### console
+
+Opens a live interactive [node console](/components/osctrl-frontend/#node-console) session in the active environment — the CLI equivalent of the frontend's per-node console tab.
+
+| Command | Arguments | Description |
+|---|---|---|
+| `open` | `<uuid\|hostname>` | Open an interactive console session to a node. |
+
+Inside an open session, type SQL or shell-style commands (`ls`, `cd`, `pwd`, `get <path>`, `tables`, `help`); `exit` closes the session.
+
+### file-explorer
+
+Opens a live remote [file explorer](/components/osctrl-frontend/#file-explorer) session in the active environment.
+
+| Command | Arguments | Description |
+|---|---|---|
+| `open` | `<uuid\|hostname>` | Open an interactive file explorer session to a node. |
+
+Inside an open session: `ls <path>` / `stat <path>` (list or stat a path), `cd <dir>` (re-roots the session), `exit` closes it.
+
+### posture
+
+Node posture and compliance-scoring data.
+
+| Command | Arguments | Description |
+|---|---|---|
+| `show` | `<uuid\|hostname>` | Show posture data for a node. |
+| `score` | `<uuid\|hostname>` | Show the SOC2/ISO27001 risk score for a node. |
+| `profiles` (or `ls`) | | List posture profile templates. |
 
 ### environments
 
@@ -257,7 +306,7 @@ except `hidden` (a boolean) and `expiration` (an integer in hours).
 
 ```text
 $ ./osctrl-cli shell --db -D db.yml
-🛡️  osctrl-cli interactive shell  v0.5.6
+🛡️  osctrl-cli interactive shell  v0.5.8
 📡  db mode
 💡  Type 'help' or '?' for help · 'exit' to quit
 
