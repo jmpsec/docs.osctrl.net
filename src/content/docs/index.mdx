@@ -6,7 +6,14 @@ hero:
   title: osctrl
   tagline: Fast and efficient osquery management.
   image:
-    file: ../../assets/osctrl-logo-dark.png
+    # Raw <img> tags instead of light/dark asset refs: Starlight's <Image>
+    # (used for light/dark and file: hero images) re-encodes to lossy webp
+    # by default, which visibly shifts these flat brand colors away from
+    # what the header logo renders (SiteTitle serves the source PNG
+    # untouched). This keeps both pixel-identical.
+    html: |
+      <img src="/img/osctrl-logo-dark.png" width="400" height="400" alt="" class="light:sl-hidden" style="width:100%;height:auto" />
+      <img src="/img/osctrl-logo-light.png" width="400" height="400" alt="" class="dark:sl-hidden" style="width:100%;height:auto" />
   actions:
     - text: Get started
       link: /deployment/

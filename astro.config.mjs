@@ -11,7 +11,8 @@ export default defineConfig({
       title: 'osctrl',
       description: 'Documentation for osctrl: Fast and efficient osquery management',
       logo: {
-        src: './src/assets/osctrl-logo-dark.png',
+        light: './src/assets/osctrl-logo-light.png',
+        dark: './src/assets/osctrl-logo-dark.png',
         alt: 'osctrl',
         replacesTitle: false,
       },

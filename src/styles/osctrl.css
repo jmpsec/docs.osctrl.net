@@ -172,6 +172,42 @@ a.site-title span {
   text-align: center;
 }
 
+/* ---------- Panel circuit background ---------- */
+/* Both the left nav and the right "On this page" panel get a solid fill of
+ * the sidebar color (matching what the left panel already used) plus the
+ * circuit texture, full-height and unfaded — unlike body::before, which
+ * fades out because it sits behind scrolling content instead of a panel. */
+.right-sidebar-panel {
+  position: relative;
+  z-index: 0;
+}
+
+.sidebar-pane,
+.right-sidebar-panel {
+  background-color: var(--sl-color-bg-sidebar);
+}
+
+.sidebar-pane::before,
+.right-sidebar-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-color: rgba(43, 196, 190, 0.045);
+  -webkit-mask-image: url('/img/circuit.svg');
+  mask-image: url('/img/circuit.svg');
+  -webkit-mask-repeat: repeat;
+  mask-repeat: repeat;
+  -webkit-mask-size: 220px 220px;
+  mask-size: 220px 220px;
+}
+
+:root[data-theme='light'] .sidebar-pane::before,
+:root[data-theme='light'] .right-sidebar-panel::before {
+  background-color: rgba(10, 138, 133, 0.075);
+}
+
 /* ---------- Accents ---------- */
 .sl-markdown-content a:not(:where(.not-content *)) {
   color: var(--sl-color-text-accent);
