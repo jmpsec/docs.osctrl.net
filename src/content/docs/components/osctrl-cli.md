@@ -5,8 +5,9 @@ sidebar:
   order: 5
 ---
 
-<figure class="component-hero">
-  <img src="/img/osctrl-cli.png" alt="osctrl-cli" />
+<figure class="component-hero diagram-hero">
+  <img class="only-light" src="/img/components-osctrl-cli-light.svg" alt="osctrl-cli reaching osctrl through the API or straight to the database" />
+  <img class="only-dark" src="/img/components-osctrl-cli-dark.svg" alt="" aria-hidden="true" />
 </figure>
 
 The osctrl-cli component is the CLI for **osctrl**. Its purpose is to execute actions in **osctrl** without having to access the backend directly or open the operator frontend. It can be very handy to automate actions in scripts or similar.

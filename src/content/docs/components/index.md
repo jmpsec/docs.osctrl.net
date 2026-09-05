@@ -4,7 +4,6 @@ description: Diagram of all the osctrl components in action and how they interac
 sidebar:
   order: 0
   label: Overview
-tableOfContents: false
 ---
 
 <figure class="component-hero diagram-hero">

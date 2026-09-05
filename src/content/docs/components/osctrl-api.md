@@ -5,8 +5,9 @@ sidebar:
   order: 2
 ---
 
-<figure class="component-hero">
-  <img src="/img/osctrl-api.png" alt="osctrl-api" />
+<figure class="component-hero diagram-hero">
+  <img class="only-light" src="/img/components-osctrl-api-light.svg" alt="osctrl-api between the frontend, CLI and MCP bridge and the backend" />
+  <img class="only-dark" src="/img/components-osctrl-api-dark.svg" alt="" aria-hidden="true" />
 </figure>
 
 The osctrl-api component of **osctrl** provides an API interface to interact with its enrolled nodes and with **osctrl** itself.

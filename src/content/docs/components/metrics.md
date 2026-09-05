@@ -5,8 +5,9 @@ sidebar:
   order: 8
 ---
 
-<figure class="component-hero">
-  <img src="/img/metrics.png" alt="Metrics" />
+<figure class="component-hero diagram-hero">
+  <img class="only-light" src="/img/components-metrics-light.svg" alt="osctrl-tls and osctrl-api reporting metrics" />
+  <img class="only-dark" src="/img/components-metrics-dark.svg" alt="" aria-hidden="true" />
 </figure>
 
 The metrics component of **osctrl** provides instrumentation for the following operations:

@@ -5,8 +5,9 @@ sidebar:
   order: 3
 ---
 
-<figure class="component-hero">
-  <img src="/img/osctrl.png" alt="osctrl-mcp" />
+<figure class="component-hero diagram-hero">
+  <img class="only-light" src="/img/components-osctrl-mcp-light.svg" alt="MCP clients reaching osctrl through osctrl-mcp and osctrl-api" />
+  <img class="only-dark" src="/img/components-osctrl-mcp-dark.svg" alt="" aria-hidden="true" />
 </figure>
 
 The osctrl-mcp component is the Model Context Protocol bridge for **osctrl**. It gives MCP-capable assistants and automation tools a safer, structured way to work with osctrl data through [osctrl-api](/components/osctrl-api/) instead of connecting directly to the backend database.

@@ -5,8 +5,9 @@ sidebar:
   order: 9
 ---
 
-<figure class="component-hero">
-  <img src="/img/osctrld.png" alt="osctrld" />
+<figure class="component-hero diagram-hero">
+  <img class="only-light" src="/img/components-osctrld-light.svg" alt="osctrld endpoints inside osctrl-tls bootstrapping osquery installs" />
+  <img class="only-dark" src="/img/components-osctrld-dark.svg" alt="" aria-hidden="true" />
 </figure>
 
 The `osctrld` functionality in **osctrl** is the bootstrap and maintenance surface used to prepare osquery installations with environment-specific flags, certificates, scripts and packages.

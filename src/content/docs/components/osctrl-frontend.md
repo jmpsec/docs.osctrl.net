@@ -5,6 +5,11 @@ sidebar:
   order: 4
 ---
 
+<figure class="component-hero diagram-hero">
+  <img class="only-light" src="/img/components-osctrl-frontend-light.svg" alt="Operators reaching the frontend through nginx, which calls osctrl-api" />
+  <img class="only-dark" src="/img/components-osctrl-frontend-dark.svg" alt="" aria-hidden="true" />
+</figure>
+
 The osctrl-frontend component is the operator UI for **osctrl**. It provides the browser experience for managing environments, nodes, queries, saved queries, carves, tags, users, settings and posture data.
 
 It replaces the old `osctrl-admin` interface. New operator-facing improvements are built here, as a React single-page application that talks to [osctrl-api](/components/osctrl-api/) instead of rendering pages from a separate admin service.

@@ -145,13 +145,13 @@ a.site-title span {
  * images, so on the components overview it spans the whole content pane. That
  * page turns its table of contents off to free up the column; prose inside the
  * widened container stays at the normal reading width. */
-main:has(.diagram-hero) .sl-container {
-  max-width: none;
-}
-main:has(.diagram-hero) .sl-markdown-content > *:not(.diagram-hero) {
-  max-width: var(--sl-content-width);
-}
+/* Component pages get a slice of the architecture diagram, sized like the
+ * images they replaced; the full one on the overview takes the column. */
 .diagram-hero img {
+  width: min(100%, 560px);
+}
+.diagram-hero img[src$='components-light.svg'],
+.diagram-hero img[src$='components-dark.svg'] {
   width: 100%;
 }
 
