@@ -2,7 +2,7 @@
 title: nginx
 description: TLS termination and load balancing in front of the osctrl services.
 sidebar:
-  order: 5
+  order: 6
 ---
 
 <figure class="component-hero">

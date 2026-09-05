@@ -2,7 +2,7 @@
 title: Metrics
 description: Instrumentation for osctrl operations, to assess performance at scale.
 sidebar:
-  order: 7
+  order: 8
 ---
 
 <figure class="component-hero">

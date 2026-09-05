@@ -5,7 +5,7 @@ sidebar:
   order: 3
 ---
 
-`osctrl-cli` is the CLI for **osctrl**. Its purpose is to execute actions in **osctrl** without having to access directly the backend or use the admin interface. It can be very handy to automate actions in scripts or similar.
+`osctrl-cli` is the CLI for **osctrl**. Its purpose is to execute actions in **osctrl** without having to access the backend directly or open the operator frontend. It can be very handy to automate actions in scripts or similar.
 
 Execute `./osctrl-cli help` to show the main help of the program:
 

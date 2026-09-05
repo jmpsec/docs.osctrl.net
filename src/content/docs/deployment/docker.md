@@ -44,6 +44,8 @@ The compose file keeps the services on an internal Docker network and exposes on
 | `osctrl-cli` | Creates the initial environment and user data |
 | `osquery-1`, `osquery-2`, `osquery-3` | Test osquery clients |
 
+The development stack does not publish [osctrl-mcp](/components/osctrl-mcp/) by default. If you are testing MCP workflows, run it beside the stack with access to the internal `osctrl-api` endpoint and expose only the MCP listener your trusted client needs.
+
 ## Useful Commands
 
 ```bash

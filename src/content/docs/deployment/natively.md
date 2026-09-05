@@ -213,7 +213,8 @@ The upgrade path refuses to continue if the source checkout has local changes. C
 | `--part api` | Deploy only the API and frontend path |
 | `--all-hostname` | Use the same hostname for all services |
 | `--public-tls-port` | Change the public nginx port for the TLS endpoint |
-| `--public-admin-port` | Change the public nginx port for the operator frontend |
+| `--public-admin-port` | Change the public nginx port for the operator frontend; the option keeps the script's legacy name |
+| `--public-api-port` | Change the public nginx port for `osctrl-api` |
 | `--dest` | Change the install directory from `/opt/osctrl` |
 | `--admin` | Create an initial admin user and print its password |
 | `--password` | Set the initial admin password instead of generating one |

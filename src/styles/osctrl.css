@@ -141,16 +141,41 @@ a.site-title span {
   width: min(75%, 520px);
   height: auto;
 }
+/* The architecture diagram carries far more detail than the other component
+ * images, so on the components overview it spans the whole content pane. That
+ * page turns its table of contents off to free up the column; prose inside the
+ * widened container stays at the normal reading width. */
+main:has(.diagram-hero) .sl-container {
+  max-width: none;
+}
+main:has(.diagram-hero) .sl-markdown-content > *:not(.diagram-hero) {
+  max-width: var(--sl-content-width);
+}
+.diagram-hero img {
+  width: 100%;
+}
 
-/* The component diagrams are PNGs with baked-in white backgrounds, drawn
- * back when the docs were light-only. On dark they read as a torn-out
- * rectangle, so frame them as a deliberate light panel until the diagrams
- * are redrawn with transparency. */
+/* The diagram ships as a light and a dark cut, since an <img> cannot see the
+ * page's data-theme. Swap them rather than filtering one. */
+:root[data-theme='dark'] .diagram-hero .only-light,
+:root[data-theme='light'] .diagram-hero .only-dark {
+  display: none;
+}
+
+/* The component diagrams have baked-in white backgrounds, drawn back when
+ * the docs were light-only. On dark they read as a torn-out rectangle, so
+ * frame them as a deliberate light panel until the diagrams are redrawn
+ * with transparency. */
 :root[data-theme='dark'] .component-hero img {
   background: #ffffff;
   border: 1px solid var(--sl-color-hairline-light);
   border-radius: 8px;
   padding: 0.75rem;
+}
+:root[data-theme='dark'] .diagram-hero img {
+  background: transparent;
+  border: 0;
+  padding: 0;
 }
 
 /* Homepage product recording. Wider than component diagrams because it is

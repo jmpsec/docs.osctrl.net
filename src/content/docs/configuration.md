@@ -13,10 +13,12 @@ Each [component](/components/) of **osctrl** requires configuration in order to 
 
 ## Single YAML Configuration
 
-All osctrl services ([osctrl-tls](/components/osctrl-tls/) and [osctrl-api](/components/osctrl-api/)) now use a unified YAML configuration file that includes all necessary settings in one place. The default filenames are:
+The core osctrl services ([osctrl-tls](/components/osctrl-tls/) and [osctrl-api](/components/osctrl-api/)) now use a unified YAML configuration file that includes all necessary settings in one place. The default filenames are:
 
 * `tls.yaml` for [osctrl-tls](/components/osctrl-tls/)
 * `api.yaml` for [osctrl-api](/components/osctrl-api/)
+
+When deployed, [osctrl-mcp](/components/osctrl-mcp/) should keep its own integration configuration, conventionally `mcp.yaml`, because it talks to `osctrl-api` as a client instead of sharing the service configuration stored by the core services.
 
 You can specify a different configuration file using the `--config-file` or `-C` flag.
 
@@ -395,6 +397,49 @@ debug:
   showBody: false                   # Include request body in dumps
 ```
 
+#### osctrl-mcp Configuration
+
+`osctrl-mcp` is the Model Context Protocol bridge for operators and automation. Run it next to `osctrl-api`, point it at the API endpoint, and give it a dedicated service-account token with the smallest permissions that fit your workflow.
+
+Keep the MCP service configuration separate from `api.yaml` and `tls.yaml`:
+
+```yaml
+mcp:
+  transport: "stdio"                # stdio for local clients; http/sse only behind TLS and auth
+  listener: "127.0.0.1"             # Bind locally unless a remote MCP client needs access
+  port: "9010"
+  publicURL: ""                     # External URL when using a network transport
+
+osctrl:
+  apiURL: "https://api.example.com"
+  token: ""                         # Prefer an environment variable or secret manager
+  timeout: 30s
+
+tools:
+  readOnly: true                    # Recommended default for assistant access
+  allowQueries: false
+  allowCarves: false
+  defaultEnvironment: ""
+```
+
+For a local MCP client, register the server with a small client-side configuration and keep the token outside the file when possible:
+
+```json
+{
+  "mcpServers": {
+    "osctrl": {
+      "command": "/opt/osctrl/osctrl-mcp",
+      "args": ["--config-file", "/etc/osctrl/mcp.yaml"],
+      "env": {
+        "OSCTRL_MCP_API_TOKEN": "replace-with-a-secret"
+      }
+    }
+  }
+}
+```
+
+Use `stdio` for local desktop agents. Use a network transport only for trusted clients, behind HTTPS, and preferably on the same private network as `osctrl-api`.
+
 ### Service Configuration API and Restart
 
 Set `service.serviceConfigEnabled: true` (`osctrl-api` only) to expose `/api/v1/service-config` and show the **Service Config** section in [osctrl-frontend](/components/osctrl-frontend/). Once enabled, operators can review and edit any of the sections above from the UI, persisted to the `service_config` table in the backend database.
@@ -505,6 +550,11 @@ Common flags:
 * `--redis-host`: Redis host
 * `--listener` or `-l`: Service listener
 * `--port` or `-p`: Service port
+* `--trusted-proxies`: Comma-separated CIDRs whose forwarded client IP headers are trusted
+* `--geoip-db`: Path to a MaxMind GeoLite2-Country `.mmdb` file for node country enrichment
+* `--loggers`: Comma-separated logger list for running multiple log sinks from seed configuration
+* `--posture-enabled`: Enable posture ingestion and API/frontend posture surfaces
+* `--posture-query-prefix`: Scheduled-query name prefix ingested as posture data
 * `--service-config-enabled`: Expose the service configuration API/frontend (`osctrl-api` only)
 * `--log-sinks-enabled`: Expose the log sinks API/frontend (default `true`)
 * `--auth-providers-enabled`: Expose the auth providers API/frontend (default `true`)
@@ -523,6 +573,11 @@ Example:
 export SERVICE_PORT="9000"
 export DB_HOST="postgres.example.com"
 export REDIS_HOST="redis.example.com"
+export SERVICE_TRUSTED_PROXIES="10.0.0.0/8,172.16.0.0/12"
+export SERVICE_GEOIP_DB="/var/osctrl/GeoLite2-Country.mmdb"
+export SERVICE_POSTURE_ENABLED="true"
+export SERVICE_ALERTS_ENABLED="true"
+export SERVICE_CONFIG_ENABLED="true"
 ```
 
 ### Migration from JSON to YAML

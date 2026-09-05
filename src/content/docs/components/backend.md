@@ -2,7 +2,7 @@
 title: Backend
 description: The centralized datastore where all osctrl data is stored.
 sidebar:
-  order: 6
+  order: 7
 ---
 
 <figure class="component-hero">

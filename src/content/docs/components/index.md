@@ -4,13 +4,15 @@ description: Diagram of all the osctrl components in action and how they interac
 sidebar:
   order: 0
   label: Overview
+tableOfContents: false
 ---
 
-<figure class="component-hero">
-  <img src="/img/components.png" alt="osctrl components and their interactions" />
+<figure class="component-hero diagram-hero">
+  <img class="only-light" src="/img/components-light.svg" alt="Current osctrl architecture diagram" />
+  <img class="only-dark" src="/img/components-dark.svg" alt="" aria-hidden="true" />
 </figure>
 
-Diagram of all the osctrl components in action.
+Diagram of the current osctrl components in action. `osctrl-mcp` sits beside `osctrl-cli` as another automation interface backed by `osctrl-api`.
 
 ## The components
 
@@ -18,6 +20,7 @@ Diagram of all the osctrl components in action.
 | --- | --- |
 | [osctrl-tls](/components/osctrl-tls/) | TLS endpoint implementing the osquery remote API |
 | [osctrl-api](/components/osctrl-api/) | REST API for nodes and for osctrl itself |
+| [osctrl-mcp](/components/osctrl-mcp/) | Model Context Protocol bridge for assistant and automation workflows |
 | [osctrl-frontend](/components/osctrl-frontend/) | Browser operator interface backed by osctrl-api |
 | [osctrl-cli](/components/osctrl-cli/) | Command line interface for automation |
 | [nginx](/components/nginx/) | TLS termination and load balancing |

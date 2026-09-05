@@ -2,7 +2,7 @@
 title: osctrld
 description: Bootstrap and maintenance of osquery installations, served by osctrl-tls endpoints.
 sidebar:
-  order: 8
+  order: 9
 ---
 
 <figure class="component-hero">
@@ -15,7 +15,7 @@ The `osctrld` functionality in **osctrl** is the bootstrap and maintenance surfa
 In current upstream **osctrl**, `osctrld` is no longer documented as a standalone binary. Instead, the osctrld functionality lives behind dedicated endpoints exposed by `osctrl-tls` when `osctrld.enabled: true` or `--enable-osctrld` is set.
 :::
 
-Those endpoints are intended to help bootstrap and manage osquery installations without having to talk directly to the admin or API services. They currently cover:
+Those endpoints are intended to help bootstrap and manage osquery installations without having to use the operator frontend or call the API manually. They currently cover:
 
 * Retrieving generated osquery flags,
 * Retrieving the environment certificate,

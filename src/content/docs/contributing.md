@@ -12,7 +12,7 @@ Like any other open source projects, there are multiple ways to contribute to os
 
 ## Reporting Bugs
 
-If you found something broken or not working properly, feel free to create an issue in Github with as much information as possible, such as logs and how to reproduce the problem. Before opening the issue, make sure that:
+If you found something broken or not working properly, feel free to create an issue in GitHub with as much information as possible, such as logs and how to reproduce the problem. Before opening the issue, make sure that:
 
 * You have read this documentation,
 * You are using the [latest stable version](https://github.com/jmpsec/osctrl/releases) of osctrl,

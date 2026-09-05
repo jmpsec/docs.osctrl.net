@@ -2,7 +2,7 @@
 title: osctrl-api
 description: The REST API to interact with enrolled nodes and with osctrl itself.
 sidebar:
-  order: 3
+  order: 2
 ---
 
 <figure class="component-hero">
