@@ -6,13 +6,13 @@ sidebar:
 ---
 
 <figure class="component-hero diagram-hero">
-  <img class="only-light" src="/img/components-osctrl-mcp-light.svg" alt="MCP clients reaching osctrl through osctrl-mcp and osctrl-api" />
+  <img class="only-light" src="/img/components-osctrl-mcp-light.svg" alt="An MCP client spawns osctrl-mcp over stdio on one host, and osctrl-mcp calls osctrl-api" />
   <img class="only-dark" src="/img/components-osctrl-mcp-dark.svg" alt="" aria-hidden="true" />
 </figure>
 
 The osctrl-mcp component is the Model Context Protocol bridge for **osctrl**. It gives MCP-capable assistants and automation tools a safer, structured way to work with osctrl data through [osctrl-api](/components/osctrl-api/) instead of connecting directly to the backend database.
 
-Use it when you want an assistant to help with operator workflows: finding nodes, inspecting environment state, checking posture signals, preparing queries, or summarizing what is happening across the fleet. The component should be treated like any other privileged integration: run it close to `osctrl-api`, give it narrowly scoped credentials, and expose it only to trusted MCP clients.
+Use it when you want an assistant to help with operator workflows: finding nodes, inspecting environment state, checking posture signals, preparing queries, or summarizing what is happening across the fleet. The component should be treated like any other privileged integration: give it narrowly scoped credentials, and register it only with MCP clients you trust.
 
 ## How It Fits
 
@@ -26,6 +26,8 @@ All three should go through [osctrl-api](/components/osctrl-api/) for platform a
 
 ## Deployment Notes
 
-Deploy `osctrl-mcp` as an internal service next to `osctrl-api`, with network access to the API endpoint and no direct access to PostgreSQL unless you have a very specific operational reason. In Docker or Kubernetes deployments, this usually means adding it to the same private network as `osctrl-api` and publishing only the MCP transport endpoint needed by your trusted client.
+`osctrl-mcp` is not a daemon. It speaks MCP over stdio and is launched by the MCP client itself, so there is no listener to expose, no port to publish and no state to persist. It needs only network access to the `osctrl-api` endpoint, and no direct access to PostgreSQL.
 
-For production, create a dedicated osctrl service account for MCP usage, keep its token out of the frontend, and rotate it like any other integration secret.
+It is read-only unless started with `--allow-writes`. Create a dedicated osctrl service account for MCP usage, scope it to what the agent should read, keep its token out of the frontend, and rotate it like any other integration secret.
+
+See the [usage of osctrl-mcp](/usage/osctrl-mcp/) for the flags, the tool list and client registration examples.

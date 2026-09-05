@@ -18,7 +18,7 @@ The core osctrl services ([osctrl-tls](/components/osctrl-tls/) and [osctrl-api]
 * `tls.yaml` for [osctrl-tls](/components/osctrl-tls/)
 * `api.yaml` for [osctrl-api](/components/osctrl-api/)
 
-When deployed, [osctrl-mcp](/components/osctrl-mcp/) should keep its own integration configuration, conventionally `mcp.yaml`, because it talks to `osctrl-api` as a client instead of sharing the service configuration stored by the core services.
+[osctrl-mcp](/components/osctrl-mcp/) has no YAML configuration of its own: it talks to `osctrl-api` as a client over stdio and is configured entirely through flags or environment variables.
 
 You can specify a different configuration file using the `--config-file` or `-C` flag.
 
@@ -399,46 +399,20 @@ debug:
 
 #### osctrl-mcp Configuration
 
-`osctrl-mcp` is the Model Context Protocol bridge for operators and automation. Run it next to `osctrl-api`, point it at the API endpoint, and give it a dedicated service-account token with the smallest permissions that fit your workflow.
+`osctrl-mcp` is the Model Context Protocol server for operators and automation. It has **no YAML configuration**: it speaks MCP over stdio, is launched by the MCP client rather than run as a service, and takes everything it needs from flags or environment variables.
 
-Keep the MCP service configuration separate from `api.yaml` and `tls.yaml`:
+| Flag | Environment variable | Purpose |
+| --- | --- | --- |
+| `--api-url` | `OSCTRL_API_URL` | Base URL of `osctrl-api` |
+| `--api-token` | `OSCTRL_API_TOKEN` | Bearer token; prefer the environment variable so it stays out of the process list |
+| `--config`, `-c` | `OSCTRL_API_FILE` | Path to an `osctrl-api.json` holding `url` + `token` |
+| `--insecure` | `OSCTRL_INSECURE` | Skip TLS verification — development only |
+| `--allow-writes` | `OSCTRL_MCP_ALLOW_WRITES` | Expose the mutating tools; off by default |
+| `--log-level` | `OSCTRL_LOG_LEVEL` | `debug`, `info`, `warn`, `error` (default `info`) |
 
-```yaml
-mcp:
-  transport: "stdio"                # stdio for local clients; http/sse only behind TLS and auth
-  listener: "127.0.0.1"             # Bind locally unless a remote MCP client needs access
-  port: "9010"
-  publicURL: ""                     # External URL when using a network transport
+The config file is read first and explicit flags or environment variables override it. Give it a dedicated service-account token with the smallest permissions that fit your workflow.
 
-osctrl:
-  apiURL: "https://api.example.com"
-  token: ""                         # Prefer an environment variable or secret manager
-  timeout: 30s
-
-tools:
-  readOnly: true                    # Recommended default for assistant access
-  allowQueries: false
-  allowCarves: false
-  defaultEnvironment: ""
-```
-
-For a local MCP client, register the server with a small client-side configuration and keep the token outside the file when possible:
-
-```json
-{
-  "mcpServers": {
-    "osctrl": {
-      "command": "/opt/osctrl/osctrl-mcp",
-      "args": ["--config-file", "/etc/osctrl/mcp.yaml"],
-      "env": {
-        "OSCTRL_MCP_API_TOKEN": "replace-with-a-secret"
-      }
-    }
-  }
-}
-```
-
-Use `stdio` for local desktop agents. Use a network transport only for trusted clients, behind HTTPS, and preferably on the same private network as `osctrl-api`.
+For the full tool list and client registration examples, see the [usage of osctrl-mcp](/usage/osctrl-mcp/).
 
 ### Service Configuration API and Restart
 

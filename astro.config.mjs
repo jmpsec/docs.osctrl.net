@@ -98,6 +98,7 @@ export default defineConfig({
             { slug: 'usage', label: 'Overview' },
             'usage/osctrl-tls',
             'usage/osctrl-api',
+            'usage/osctrl-mcp',
             'usage/auth-providers',
             {
               label: 'osctrl-cli',
