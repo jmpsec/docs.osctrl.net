@@ -9,7 +9,7 @@ info:
     url: https://github.com/jmpsec/osctrl/blob/master/LICENSE
   termsOfService: https://github.com/jmpsec/osctrl
   title: osctrl API
-  version: 0.5.8
+  version: 0.5.9
 paths:
   /:
     get:
@@ -3375,6 +3375,40 @@ paths:
       summary: Update enrolling package URL
       tags:
         - environments
+  /api/v1/health/status:
+    get:
+      description: Component health, per-service runtime detail and upgrade status.
+        Admin only.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.healthStatusResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "503":
+          description: Health reporting disabled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+      security:
+        - ApiKeyAuth: []
+      summary: Deployment health
+      tags:
+        - health
   /api/v1/log-sinks:
     get:
       description: Returns log sink rows, optionally filtered by environment. Secrets
@@ -9039,7 +9073,7 @@ paths:
       tags:
         - system
 servers:
-  - url: https://osctrl.net
+  - url: /
 components:
   requestBodies:
     handlers.MFAWebAuthnRequest:
@@ -9652,6 +9686,17 @@ components:
         updated_at:
           type: string
       type: object
+    handlers.healthStatusResponse:
+      properties:
+        components:
+          items:
+            $ref: "#/components/schemas/health.Component"
+          type: array
+        generated_at:
+          type: string
+        upgrade:
+          $ref: "#/components/schemas/health.UpgradeInfo"
+      type: object
     handlers.logSinkDTO:
       properties:
         bytes_sent:
@@ -9684,6 +9729,46 @@ components:
           type: string
         updated_at:
           type: string
+      type: object
+    health.Component:
+      properties:
+        details:
+          additionalProperties: {}
+          type: object
+        id:
+          type: string
+        name:
+          type: string
+        status:
+          type: string
+        summary:
+          type: string
+      type: object
+    health.UpgradeInfo:
+      properties:
+        api_version:
+          description: |-
+            API and TLS expose the per-service versions behind Skew so the page
+            can name both sides of a mismatch.
+          type: string
+        checked:
+          type: boolean
+        checked_at:
+          type: string
+        current:
+          type: string
+        latest:
+          type: string
+        more_information:
+          type: string
+        skew:
+          type: boolean
+        suggested:
+          type: string
+        tls_version:
+          type: string
+        up_to_date:
+          type: boolean
       type: object
     nodes.OsqueryNode:
       properties:
@@ -11209,6 +11294,13 @@ components:
           type: string
         fullname:
           type: string
+        preferred_language:
+          description: |-
+            PreferredLanguage is the UI language tag the operator picked.
+            Validated against the supported-language list; an empty value
+            leaves the stored preference unchanged (same semantics as the
+            other patch fields).
+          type: string
       type: object
     types.UserMeResponse:
       properties:
@@ -11224,6 +11316,12 @@ components:
           additionalProperties:
             $ref: "#/components/schemas/types.EnvAccessView"
           type: object
+        preferred_language:
+          description: |-
+            PreferredLanguage mirrors AdminUser.PreferredLanguage — the
+            UI language the operator picked. Empty means "no server-side
+            preference"; the SPA falls back to its own detection.
+          type: string
         service:
           type: boolean
         token_expire:
