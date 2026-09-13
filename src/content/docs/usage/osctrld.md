@@ -92,9 +92,12 @@ Response:
 {
   "flags": "...",
   "certificate": "-----BEGIN CERTIFICATE-----...",
-  "osquery_version": "5.23.0"
+  "osquery_version": "5.23.1",
+  "osquery_sha256": ""
 }
 ```
+
+`osquery_sha256` is empty unless `osquery.sha256` is set in `tls.yaml`. When present, osctrld uses it to verify the package it downloads before installing it.
 
 ### Generate install or remove scripts
 
@@ -138,12 +141,26 @@ Notes:
 * `script` must start with `enroll` or `remove`.
 * The secret path must match the environment and must not be expired.
 
+### Quick-link lifecycle actions
+
+The quick enroll and quick remove URLs each have their own secret path and expiration. Operators can manage them from `osctrl-cli environment node-actions`:
+
+| Command | Effect |
+| --- | --- |
+| `extend-enroll` / `extend-remove` | Extend the current URL expiration |
+| `rotate-enroll` / `rotate-remove` | Generate a new secret path and set a fresh expiration |
+| `expire-enroll` / `expire-remove` | Expire the current URL immediately |
+| `notexpire-enroll` / `notexpire-remove` | Mark the current URL as non-expiring |
+
+The API exposes the same lifecycle through `POST /api/v1/environments/{env}/enroll/{action}` and `POST /api/v1/environments/{env}/remove/{action}`, where `action` is `extend`, `rotate`, `expire` or `not-expire`. These actions control whether the public quick-link routes below keep working; the osctrld script endpoints that use the long-lived environment secret are unchanged.
+
 ### Package download
 
 Route:
 
 ```properties
 GET /{env_uuid}/{secret_path}/package/{package}
+GET /{env_uuid}/{secret_path}/package/{package}/{arch}
 ```
 
 Supported package values:
@@ -155,9 +172,11 @@ Supported package values:
 
 If the environment package value is an `http` URL, `osctrl-tls` redirects to it. Otherwise it serves the local package file from the configured enroll package directory.
 
+When `{arch}` is present, `osctrl-tls` first looks for an environment package matching both package type and architecture. If there is no exact match, it falls back to the default package for that type, then to the legacy single-package fields.
+
 ### Package verification digest
 
-`osctrl-tls` can include an `osquery_sha256` value in the osctrld verify response. Set `osquery.sha256` in `tls.yaml` only when every node installs the same osquery package artifact. For mixed fleets, leave it empty and pass the expected digest to osctrld on the node, because osquery publishes different packages per format and architecture.
+Set `osquery.sha256` in `tls.yaml` only when every node installs the same osquery package artifact. For mixed fleets, leave it empty and pass the expected digest to osctrld on the node, because osquery publishes different packages per format and architecture.
 
 ## Notes
 
