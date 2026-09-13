@@ -11,6 +11,14 @@ sidebar:
 `osctrl-mcp` speaks MCP over **stdio** and is launched by the client, not run as a service. It holds no state and opens no listening socket. Every tool call becomes an authenticated request to `osctrl-api`, so the token's existing per-environment permissions are what bound the agent.
 :::
 
+If you prefer a hosted endpoint, enable the `mcp:` section in `api.yaml` instead. `osctrl-api` then serves MCP at `/api/v1/mcp` behind the same authentication, permissions and audit logging as the rest of the API:
+
+```yaml
+mcp:
+  enabled: true
+  allowWrites: false
+```
+
 Build it with `make mcp`, which produces `bin/osctrl-mcp`.
 
 Execute `./osctrl-mcp --help` to show the main help of the program:

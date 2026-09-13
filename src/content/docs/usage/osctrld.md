@@ -155,6 +155,10 @@ Supported package values:
 
 If the environment package value is an `http` URL, `osctrl-tls` redirects to it. Otherwise it serves the local package file from the configured enroll package directory.
 
+### Package verification digest
+
+`osctrl-tls` can include an `osquery_sha256` value in the osctrld verify response. Set `osquery.sha256` in `tls.yaml` only when every node installs the same osquery package artifact. For mixed fleets, leave it empty and pass the expected digest to osctrld on the node, because osquery publishes different packages per format and architecture.
+
 ## Notes
 
 * These endpoints are implemented inside `cmd/tls/main.go` and `cmd/tls/handlers/post.go` in the current upstream `develop` branch.

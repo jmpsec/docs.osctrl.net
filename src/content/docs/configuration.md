@@ -24,7 +24,7 @@ You can specify a different configuration file using the `--config-file` or `-C`
 
 Only the `service`, `db` and `redis` sections are required — every other section (`rateLimits`, `osquery`, `saml`, `oidc`, `jwt`, `tls`, `logger`, `carver`, `debug`, and the osctrl-tls-only `batchWriter`, `configEndpoints`, `osctrld`, `metrics`) can be omitted entirely and the service falls back to its built-in defaults, or to values already stored in the database.
 
-Every generated config file also starts with a top-level `version: 1` field — the configuration schema version the file targets. It's checked against the version the running binary supports: an older or missing `version` logs a startup warning that fields added since may be missing, and a newer one warns that this binary ignores fields it doesn't know about. It's never fatal, just a heads-up to compare against a fresh `config-generate` output.
+Every generated config file also starts with a top-level `version: 4` field — the configuration schema version the file targets. It's checked against the version the running binary supports: an older or missing `version` logs a startup warning that fields added since may be missing, and a newer one warns that this binary ignores fields it doesn't know about. It's never fatal, just a heads-up to compare against a fresh `config-generate` output.
 
 ### Generating and Validating Configuration
 
@@ -80,7 +80,7 @@ The YAML configuration file contains the following main sections:
 Basic service settings including network listener, ports, authentication, and logging:
 
 ```yaml
-version: 1                          # Configuration schema version
+version: 4                          # Configuration schema version
 
 service:
   listener: "0.0.0.0"               # Network interface to bind to
@@ -93,6 +93,9 @@ service:
   logSinksEnabled: true               # Expose the log sinks API + frontend section
   authProvidersEnabled: true          # Expose the auth providers API + frontend section
   alertsEnabled: false                 # Enable the alerting subsystem (routes, tables, ingest)
+  healthEnabled: false               # Enable component health/status reporting
+  eventsEnabled: false               # Enable SSE live-update invalidation hints
+  eventsNamespace: ""                # Deployment-unique Redis namespace for live updates
   mfaRequired: false                 # osctrl-api only: require MFA for password logins
   mfaIssuer: ""                      # Authenticator app label; empty uses "osctrl (<host>)"
   mfaRPID: ""                        # WebAuthn Relying Party ID; empty uses `host`
@@ -109,6 +112,8 @@ service:
 
 * `logSinksEnabled` and `authProvidersEnabled` default to `true` and gate the newer [Log Sinks](/components/osctrl-frontend/#log-sinks) and [Auth Providers](/components/osctrl-frontend/#auth-providers) API routes and frontend sections, independently of `serviceConfigEnabled`.
 * `alertsEnabled` defaults to `false` (unlike the two above) and gates the [Alerts](/components/osctrl-frontend/#alerts) subsystem end to end: with it off, no alert tables are created, no routes are registered, and there's no ingest overhead. **Changing it requires a service restart** — both `osctrl-api` and `osctrl-tls` wire their alert routes/ingest hooks at boot.
+* `healthEnabled` turns on service heartbeats and `/api/v1/health/status`.
+* `eventsEnabled` and `eventsNamespace` enable best-effort Server-Sent Events live-update hints through `/api/v1/events`. Set both on `osctrl-api` and `osctrl-tls`, and use a namespace unique to the deployment sharing Redis.
 
 **Authentication types** (`auth`):
 
@@ -303,8 +308,10 @@ Osquery-specific settings for TLS service:
 
 ```yaml
 osquery:
-  version: "5.12.1"                 # Osquery version
-  tablesFile: "data/5.12.1.json"   # Path to osquery tables JSON
+  queryDispatchTTL: 2m              # Empty distributed-query cache TTL; <=0 uses 2m
+  sha256: ""                        # Expected SHA-256 for a single osquery package artifact
+  version: "5.23.1"                 # Osquery version
+  tablesFile: "data/5.23.1.json"   # Path to osquery tables JSON
   logger: true                      # Enable remote TLS logger endpoint
   config: true                      # Enable remote TLS config endpoint
   query: true                       # Enable remote TLS query endpoints
@@ -317,6 +324,19 @@ osquery:
 
 * `console` gates the per-node interactive console (reachable from the node detail page in [osctrl-frontend](/components/osctrl-frontend/)): on osctrl-api it controls whether the feature is advertised and its routes registered (also requires `query: true`); on osctrl-tls it controls whether active console sessions can request accelerated query polling.
 * `fileExplorer` behaves the same way for the per-node file explorer, and no longer requires `accelerated: true` — only `query: true`.
+* `sha256` is handed to osctrld so nodes can verify the osquery package they download. Set it only when every node installs the same package artifact; mixed fleets should leave it empty and pass a per-node digest to osctrld instead.
+
+#### MCP Endpoint Configuration
+
+`osctrl-api` can also host an authenticated MCP endpoint at `/api/v1/mcp`:
+
+```yaml
+mcp:
+  enabled: false                    # Mount /api/v1/mcp
+  allowWrites: false                # Also expose mutating MCP tools
+```
+
+It uses the caller's normal osctrl token, permissions and audit path. Keep `allowWrites` off unless you deliberately want MCP clients to schedule queries, complete/expire queries, or tag nodes.
 
 #### Metrics Configuration
 
@@ -426,7 +446,7 @@ Set `service.serviceConfigEnabled: true` (`osctrl-api` only) to expose `/api/v1/
 #### osctrl-tls (tls.yaml)
 
 ```yaml
-version: 1
+version: 4
 
 service:
   listener: "0.0.0.0"
@@ -533,8 +553,11 @@ Common flags:
 * `--log-sinks-enabled`: Expose the log sinks API/frontend (default `true`)
 * `--auth-providers-enabled`: Expose the auth providers API/frontend (default `true`)
 * `--alerts-enabled`: Enable the alerting subsystem (default `false`, requires a restart to change)
+* `--health-enabled`: Enable service health/status reporting
+* `--mcp-enabled`, `--mcp-allow-writes`: Enable the hosted MCP endpoint on `osctrl-api`
 * `--mfa-required`, `--mfa-issuer`, `--mfa-rpid`, `--mfa-origins`: MFA settings (`osctrl-api` only)
 * `--osquery-console`: Enable the per-node interactive console
+* `--query-dispatch-ttl`: Cache TTL for empty distributed-query dispatch responses (`osctrl-tls` only)
 * `--rate-limit-<name>-burst`, `--rate-limit-<name>-period`, `--rate-limit-<name>-evict-after`, `--rate-limit-<name>-retry-after`, `--rate-limit-<name>-max-buckets`: Rate limit tuning, where `<name>` is `login`, `pre-auth`, `service-config-apply` (`osctrl-api`) or `enroll` (`osctrl-tls`)
 
 ### Environment Variables
@@ -551,7 +574,9 @@ export SERVICE_TRUSTED_PROXIES="10.0.0.0/8,172.16.0.0/12"
 export SERVICE_GEOIP_DB="/var/osctrl/GeoLite2-Country.mmdb"
 export SERVICE_POSTURE_ENABLED="true"
 export SERVICE_ALERTS_ENABLED="true"
+export SERVICE_HEALTH_ENABLED="true"
 export SERVICE_CONFIG_ENABLED="true"
+export MCP_ENABLED="true"
 ```
 
 ### Migration from JSON to YAML

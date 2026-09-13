@@ -3161,6 +3161,152 @@ paths:
       summary: Update environment expiration
       tags:
         - environments
+  "/api/v1/environments/inactive-hours/{env}":
+    delete:
+      parameters:
+        - description: Environment name or UUID
+          in: path
+          name: env
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/settings.InactivityPolicy"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+      security:
+        - ApiKeyAuth: []
+      summary: Reset environment inactivity threshold
+      tags:
+        - environments
+    get:
+      parameters:
+        - description: Environment name or UUID
+          in: path
+          name: env
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/settings.InactivityPolicy"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+      security:
+        - ApiKeyAuth: []
+      summary: Get environment inactivity threshold
+      tags:
+        - environments
+    put:
+      parameters:
+        - description: Environment name or UUID
+          in: path
+          name: env
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/handlers.InactiveHoursRequest"
+        description: Positive whole hours (1 to 2562047)
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/settings.InactivityPolicy"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+      security:
+        - ApiKeyAuth: []
+      summary: Set environment inactivity threshold
+      tags:
+        - environments
   "/api/v1/environments/intervals/{env}":
     patch:
       description: Updates osquery interval settings for an environment.
@@ -3375,10 +3521,115 @@ paths:
       summary: Update enrolling package URL
       tags:
         - environments
+  /api/v1/events:
+    get:
+      description: Best-effort SSE invalidation hints. No replay; refetch REST
+        snapshots after stream.ready and retain polling. Requires the
+        corresponding environment query/carve/admin permissions. Session-scoped
+        console and file_explorer topics require console_session or
+        file_explorer_session respectively. Alerts may use env=all.
+        service_commands and fleet require super-admin permissions and env=all.
+      parameters:
+        - description: Environment name or UUID; use all only with topic=alerts,
+            topic=service_commands, or topic=fleet
+          in: query
+          name: env
+          required: true
+          schema:
+            type: string
+        - description: "Topics: queries, carves, console, file_explorer, alerts,
+            service_commands, fleet"
+          in: query
+          name: topic
+          required: true
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - description: Console session id required when subscribing to topic=console
+          in: query
+          name: console_session
+          schema:
+            type: integer
+        - description: File explorer session id required when subscribing to
+            topic=file_explorer
+          in: query
+          name: file_explorer_session
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: "SSE stream: stream.ready, resource.changed, auth.expired"
+          content:
+            text/event-stream json:
+              schema:
+                type: string
+        "400":
+          description: Bad Request
+          content:
+            text/event-stream json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            text/event-stream json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            text/event-stream json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            text/event-stream json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "429":
+          description: Too Many Requests
+          content:
+            text/event-stream json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "503":
+          description: Service Unavailable
+          content:
+            text/event-stream json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+      security:
+        - ApiKeyAuth: []
+      summary: Subscribe to resource change notifications
+      tags:
+        - Events
+  /api/v1/features:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.FeaturesResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+      security:
+        - ApiKeyAuth: []
+      summary: Get enabled API features
+      tags:
+        - Features
   /api/v1/health/status:
     get:
-      description: Component health, per-service runtime detail and upgrade status.
-        Admin only.
+      description: Component health, per-service runtime detail, live-update transport
+        counters, and upgrade status. Admin only.
       responses:
         "200":
           description: OK
@@ -9435,6 +9686,10 @@ components:
           type: integer
         inactive:
           type: integer
+        inactive_hours:
+          description: InactiveHours is the effective threshold for this environment,
+            including inheritance.
+          type: integer
         name:
           type: string
         platform_counts:
@@ -9464,6 +9719,60 @@ components:
           type: string
         uuid:
           type: string
+      type: object
+    handlers.FeaturesResponse:
+      properties:
+        accelerated:
+          type: boolean
+        alerts:
+          description: |-
+            Alerts gates the Alerts section in the SPA. Tied to
+            --alerts-enabled — when false the /api/v1/alerts routes are not
+            registered and the alert tables are not created.
+          type: boolean
+        auth_providers:
+          type: boolean
+        console:
+          type: boolean
+        event_topics:
+          items:
+            type: string
+          type: array
+        events:
+          type: boolean
+        file_explorer:
+          type: boolean
+        health:
+          description: >-
+            Health gates the Health section in the SPA. Tied to --health-enabled
+            —
+
+            when false the /api/v1/health routes are not registered.
+          type: boolean
+        log_sinks:
+          description: |-
+            LogSinks gates the Log Sinks section in the SPA. Tied to the same
+            flag as ServiceConfig — the log_sinks routes are registered
+            alongside the service-config routes.
+          type: boolean
+        posture:
+          type: boolean
+        service_config:
+          description: >-
+            ServiceConfig gates the whole Service Config section in the SPA.
+            When
+
+            false the /api/v1/service-config routes are not registered at all.
+          type: boolean
+      type: object
+    handlers.InactiveHoursRequest:
+      properties:
+        inactive_hours:
+          maximum: 2562047
+          minimum: 1
+          type: integer
+      required:
+        - inactive_hours
       type: object
     handlers.LogoutResponse:
       properties:
@@ -9611,6 +9920,8 @@ components:
             $ref: "#/components/schemas/handlers.EnvStats"
           type: array
         inactive_hours:
+          description: InactiveHours is the global default only; node counts use each
+            environment's effective threshold.
           type: integer
         inactive_nodes:
           type: integer
@@ -10106,6 +10417,24 @@ components:
         updatedAt:
           type: string
         value:
+          type: string
+      type: object
+    settings.InactivityPolicy:
+      properties:
+        inactive_hours:
+          maximum: 2562047
+          minimum: 1
+          type: integer
+        override_hours:
+          maximum: 2562047
+          minimum: 1
+          type: integer
+          nullable: true
+        source:
+          enum:
+            - environment
+            - global
+            - default
           type: string
       type: object
     settings.SettingValue:

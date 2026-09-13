@@ -30,6 +30,16 @@ The frontend is built with:
 
 For local development, the Vite server runs from the `frontend/` directory and proxies `/api/*` requests to `osctrl-api`. In the Docker development stack, nginx exposes the frontend at `https://localhost:8444`.
 
+## Live updates
+
+When `service.eventsEnabled` is enabled on both `osctrl-api` and `osctrl-tls`, the frontend opens `/api/v1/events` streams for the views that benefit from quick refreshes: queries, carves, the node console, file explorer, alerts, service-command status, dashboard counters and node lists.
+
+These events are lightweight invalidation hints. The frontend still uses REST for the real data and keeps polling fallbacks, so deployments can leave live updates off until Redis and proxy settings are ready for long-lived SSE connections.
+
+## Environment inactivity
+
+Each environment config page can override the inactive-node threshold used by node filters, health, dashboard counts and inactive-node alerts. The default is inherited from the global `api/inactive_hours` setting, and the **Use global default** action removes the environment override.
+
 ## Node console
 
 Each node detail page can open a live interactive console that runs osquery against that single node in real time. It's gated by the `osquery.console` [configuration](/configuration/#osquery-configuration) key on `osctrl-api` (and `query: true`) — disabled by default.

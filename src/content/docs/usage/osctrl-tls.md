@@ -26,6 +26,7 @@ COMMANDS:
    config-generate                 Generate an example configuration file using the current flag values
 
 GLOBAL OPTIONS:
+   --query-dispatch-ttl duration            Empty distributed-query cache TTL; non-positive values use the 2m default [$QUERY_DISPATCH_TTL]
    --config, -c                             Provide service configuration via YAML file [$SERVICE_CONFIG]
    --config-file FILE, -C FILE              Load service configuration from FILE (default: "./config/tls.yml") [$SERVICE_CONFIG_FILE]
    --listener string, -l string             Listener for the service (default: "127.0.0.1") [$SERVICE_LISTENER]
@@ -38,6 +39,7 @@ GLOBAL OPTIONS:
    --geoip-db string                        Path to a MaxMind GeoLite2-Country .mmdb file. Empty (default) disables GeoIP enrichment. [$SERVICE_GEOIP_DB]
    --posture-enabled                        Enable security and compliance posture ingestion/API/frontend surfaces [$SERVICE_POSTURE_ENABLED]
    --alerts-enabled                         Enable alert evaluation on the log ingest path. Requires restart to change. [$SERVICE_ALERTS_ENABLED]
+   --health-enabled                         Enable health/system-status reporting and TLS service heartbeats [$SERVICE_HEALTH_ENABLED]
    --service-config-enabled                 Kept for shared config round-trip; acted on by osctrl-api [$SERVICE_CONFIG_ENABLED]
    --log-sinks-enabled                      Serve the log-sinks API/frontend section where applicable [$LOG_SINKS_ENABLED]
    --auth-providers-enabled                 Serve the auth-providers API/frontend section where applicable [$AUTH_PROVIDERS_ENABLED]
@@ -79,12 +81,15 @@ GLOBAL OPTIONS:
    --cert FILE, -T FILE                     TLS termination certificate from FILE (default: "./config/tls.crt") [$TLS_CERTIFICATE]
    --key FILE, -K FILE                      TLS termination private key from FILE (default: "./config/tls.key") [$TLS_KEY]
    --enable-osctrld                         Enable osctrld endpoints and functionality. [$OSCTRLD]
-   --osquery-version string                 Version of osquery to be used (default: "5.23.0") [$OSQUERY_VERSION]
-   --osquery-tables-file string             File with the osquery tables to be used (default: "./data/5.23.0.json") [$OSQUERY_TABLES]
+   --osquery-version string                 Version of osquery to be used (default: "5.23.1") [$OSQUERY_VERSION]
+   --osquery-tables-file string             File with the osquery tables to be used (default: "./data/5.23.1.json") [$OSQUERY_TABLES]
    --osquery-logger                         Enable remote tls logger for osquery [$OSQUERY_LOGGER]
    --osquery-config                         Enable remote tls config for osquery [$OSQUERY_CONFIG]
    --osquery-query                          Enable remote tls queries for osquery [$OSQUERY_QUERY]
    --osquery-carve                          Enable remote tls carver for osquery [$OSQUERY_CARVE]
+   --osquery-accelerated                    Enable accelerated mode when returning distributed queries to osquery [$OSQUERY_ACCELERATED]
+   --osquery-file-explorer                  Enable on-demand node file explorer queries [$OSQUERY_FILE_EXPLORER]
+   --osquery-console                        Enable on-demand per-node console queries [$OSQUERY_CONSOLE]
    --read-only-configuration                Disable configuration changes via operator UI or API services [$OSQUERY_READ_ONLY]
    --carver-type string                     Carver to be used to receive files extracted from nodes (default: "db") [$CARVER_TYPE]
    --carver-s3-bucket string                S3 bucket to be used as configuration for carves [$CARVER_S3_BUCKET]
@@ -106,6 +111,10 @@ GLOBAL OPTIONS:
    --enable-http-debug                      Enable HTTP Debug mode to dump full HTTP incoming request [$HTTP_DEBUG]
    --http-debug-file string                 File to dump the HTTP requests when HTTP Debug mode is enabled (default: "./debug-http-tls.log") [$HTTP_DEBUG_FILE]
    --http-debug-show-body                   Show body of the HTTP requests when HTTP Debug mode is enabled [$HTTP_DEBUG_SHOW_BODY]
+   --http-debug-host string                 Only dump HTTP requests from one osquery UUID / host identifier [$HTTP_DEBUG_HOST]
+   --db-health-check                        Enable DB stale-serve mode after repeated DB ping failures [$DB_HEALTH_CHECK]
+   --db-health-interval int                 Seconds between DB health pings (default: 5) [$DB_HEALTH_INTERVAL]
+   --db-health-threshold int                Consecutive ping failures before stale-serve mode (default: 3) [$DB_HEALTH_THRESHOLD]
    --version, -v                            Print version information
    --help, -h                               show help
 ```
