@@ -40,6 +40,7 @@ GLOBAL OPTIONS:
    --posture-enabled                        Enable security and compliance posture ingestion/API/frontend surfaces [$SERVICE_POSTURE_ENABLED]
    --alerts-enabled                         Enable alert evaluation on the log ingest path. Requires restart to change. [$SERVICE_ALERTS_ENABLED]
    --health-enabled                         Enable health/system-status reporting and TLS service heartbeats [$SERVICE_HEALTH_ENABLED]
+   --vuln-enabled                           Store software inventory from osctrl:vuln: scheduled queries for vulnerability matching by osctrl-api. Requires restart to change. [$SERVICE_VULN_ENABLED]
    --service-config-enabled                 Kept for shared config round-trip; acted on by osctrl-api [$SERVICE_CONFIG_ENABLED]
    --log-sinks-enabled                      Serve the log-sinks API/frontend section where applicable [$LOG_SINKS_ENABLED]
    --auth-providers-enabled                 Serve the auth-providers API/frontend section where applicable [$AUTH_PROVIDERS_ENABLED]

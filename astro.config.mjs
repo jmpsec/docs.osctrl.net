@@ -99,6 +99,7 @@ export default defineConfig({
             'usage/osctrl-tls',
             'usage/osctrl-api',
             'usage/osctrl-mcp',
+            'usage/vulnerabilities',
             'usage/auth-providers',
             {
               label: 'osctrl-cli',

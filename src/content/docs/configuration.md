@@ -94,13 +94,14 @@ service:
   authProvidersEnabled: true          # Expose the auth providers API + frontend section
   alertsEnabled: false                 # Enable the alerting subsystem (routes, tables, ingest)
   healthEnabled: false               # Enable component health/status reporting
+  vulnEnabled: false                 # Enable vulnerability monitoring (restart required)
   eventsEnabled: false               # Enable SSE live-update invalidation hints
   eventsNamespace: ""                # Deployment-unique Redis namespace for live updates
   mfaRequired: false                 # osctrl-api only: require MFA for password logins
   mfaIssuer: ""                      # Authenticator app label; empty uses "osctrl (<host>)"
   mfaRPID: ""                        # WebAuthn Relying Party ID; empty uses `host`
   mfaOrigins: ""                     # Comma-separated origins allowed for WebAuthn ceremonies
-  auditLog: true                    # Enable audit logging for sensitive actions
+  auditLog: true                    # Enable audit logging for sensitive actions (retention: audit_log_retention_days setting)
   trustedProxies: ""                 # CIDR list trusted for X-Forwarded-For/X-Real-IP
   geoipDBPath: ""                    # Path to a GeoLite2-Country .mmdb for node IP geolocation
   postureEnabled: false              # Enable security & compliance posture collection
@@ -113,6 +114,7 @@ service:
 * `logSinksEnabled` and `authProvidersEnabled` default to `true` and gate the newer [Log Sinks](/components/osctrl-frontend/#log-sinks) and [Auth Providers](/components/osctrl-frontend/#auth-providers) API routes and frontend sections, independently of `serviceConfigEnabled`.
 * `alertsEnabled` defaults to `false` (unlike the two above) and gates the [Alerts](/components/osctrl-frontend/#alerts) subsystem end to end: with it off, no alert tables are created, no routes are registered, and there's no ingest overhead. **Changing it requires a service restart** — both `osctrl-api` and `osctrl-tls` wire their alert routes/ingest hooks at boot.
 * `healthEnabled` turns on service heartbeats and `/api/v1/health/status`.
+* `vulnEnabled` turns on [vulnerability monitoring](/usage/vulnerabilities/). On `osctrl-tls` it stores software inventory; on `osctrl-api` it also registers the `/api/v1/vulnerabilities` routes and downloads OSV and CISA KEV data. When off, no tables are created and nothing is downloaded. **Requires a restart.** The feed settings (`vulnOSVURL`, `vulnKEVURL`, `vulnEcosystems`, `vulnSyncHours`, `vulnRetentionDays`, `vulnMaxDownloadMB`, `vulnNVDEnabled`, `vulnNVDURL`) are read by `osctrl-api` only; set the optional NVD API key through `VULN_NVD_API_KEY`, never in YAML.
 * `eventsEnabled` and `eventsNamespace` enable best-effort Server-Sent Events live-update hints through `/api/v1/events`. Set both on `osctrl-api` and `osctrl-tls`, and use a namespace unique to the deployment sharing Redis.
 
 **Authentication types** (`auth`):
@@ -206,7 +208,7 @@ Logging destination and settings:
 
 ```yaml
 logger:
-  type: "db"                        # Logger type: db, splunk, graylog, s3, file, kinesis, kafka, logstash, elastic
+  type: "db"                        # Logger type: db, splunk, graylog, s3, file, kinesis, kafka, logstash, elastic, http
   loggerDBSame: true                # Use same DB config as main DB for logging
   alwaysLog: false                  # Always log to DB regardless of other loggers
 
@@ -245,6 +247,17 @@ logger:
     maxBackups: 5                   # Number of old log files to retain
     maxAge: 10                      # Max days to retain old log files
     compress: true                  # Compress rotated files with gzip
+
+  # Generic HTTP logger settings (if type: http)
+  http:
+    url: "https://logs.example.com/ingest"
+    method: "POST"                  # Default POST
+    headers:                        # Extra request headers, e.g. authentication
+      Authorization: "Bearer your-token"
+    format: "json"                  # json (default), ndjson or raw
+    contentType: ""                 # Defaults to match the format
+    timeoutSeconds: 30
+    includeMetadata: false          # Wrap events with environment, uuid, logType and timestamp
 ```
 
 **Logger types**:
@@ -258,6 +271,7 @@ logger:
 * `kafka` - Send logs to Kafka topics
 * `logstash` - Send logs to Logstash
 * `elastic` - Send logs directly to Elasticsearch
+* `http` - Send logs to any HTTP/HTTPS endpoint. `format: json` sends the payload as-is, `ndjson` splits arrays into one object per line, and `raw` sends the bytes verbatim
 
 ### Log Sinks
 
@@ -439,6 +453,7 @@ For the full tool list and client registration examples, see the [usage of osctr
 Set `service.serviceConfigEnabled: true` (`osctrl-api` only) to expose `/api/v1/service-config` and show the **Service Config** section in [osctrl-frontend](/components/osctrl-frontend/). Once enabled, operators can review and edit any of the sections above from the UI, persisted to the `service_config` table in the backend database.
 
 * This switch only gates the read/edit/apply UI and API surface. Configuration is always resolved the same way at every boot: the YAML file's sections are seeded into `service_config`, and the stored rows are then resolved back over them — so the service always runs on the stored values, whether or not the API is enabled.
+* **Pinned fields beat flags and environment variables; nothing else does.** Saving a field from the Service Config page *pins* it: its stored value wins over flags, environment and YAML for that field only, while unpinned fields keep following their flag. The page marks pinned fields and lets you release them. Rows saved by older releases pin every field in their section until released. Pins keep applying after `--service-config-enabled` is switched off. If a flag such as `--port` seems ignored, look for "overrides flags, environment and YAML" in the startup log, which names the section and fields with both values.
 * Edited values can be written back to the on-disk YAML file, and a restart of `osctrl-tls` can be requested from `osctrl-api` (rate limited by `rateLimits.serviceConfigApply`) so it picks up the new values. The frontend shows a confirmation warning before requesting a restart, since it can disrupt in-flight osquery traffic.
 
 ### Example Configuration Files
@@ -554,6 +569,8 @@ Common flags:
 * `--auth-providers-enabled`: Expose the auth providers API/frontend (default `true`)
 * `--alerts-enabled`: Enable the alerting subsystem (default `false`, requires a restart to change)
 * `--health-enabled`: Enable service health/status reporting
+* `--vuln-enabled`: Enable [vulnerability monitoring](/usage/vulnerabilities/) (default `false`, requires a restart to change)
+* `--vuln-osv-url`, `--vuln-kev-url`, `--vuln-ecosystems`, `--vuln-sync-hours`, `--vuln-retention-days`, `--vuln-max-download-mb`, `--vuln-nvd-enabled`, `--vuln-nvd-url`, `--vuln-nvd-api-key`: Advisory feed settings (`osctrl-api` only)
 * `--mcp-enabled`, `--mcp-allow-writes`: Enable the hosted MCP endpoint on `osctrl-api`
 * `--mfa-required`, `--mfa-issuer`, `--mfa-rpid`, `--mfa-origins`: MFA settings (`osctrl-api` only)
 * `--osquery-console`: Enable the per-node interactive console

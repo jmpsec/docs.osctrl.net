@@ -19,3 +19,8 @@ pnpm-debug.log*
 
 # IDE metadata
 .vscode
+.claude
+.codex
+
+*.md
+!README.md

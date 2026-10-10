@@ -60,4 +60,6 @@ GLOBAL OPTIONS:
    --help, -h                         show help
 ```
 
+When using the API (`--api`) and the URL or token is missing from the flags, environment and config file, `osctrl-cli` asks for them interactively; the token is read without echo. Without a terminal it fails with an error naming the missing value instead of prompting.
+
 Each command has its own help and it is displayed appending `-h` to them. Each subcommand has its own help as well.
