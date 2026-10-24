@@ -23,7 +23,9 @@ Those endpoints are intended to help bootstrap and manage osquery installations 
 * Verifying the full osquery enrollment payload,
 * Generating install and remove scripts for Linux, macOS and Windows,
 * Serving expiring quick-enroll / quick-remove links,
-* Serving install packages for `deb`, `rpm`, `pkg` and `msi`.
+* Serving install packages for `deb`, `rpm`, `pkg` and `msi`,
+* Delivering [osquery extensions](/usage/osquery-extensions/) and coordinating [osquery upgrades](/usage/osquery-upgrades/) with staged rollouts,
+* Receiving health and rollback reports from the [osctrld daemon](/usage/osctrld-daemon/) running on each host.
 
 The endpoints are mounted inside `osctrl-tls`, use the environment UUID in the path, and validate either the environment secret or the time-bounded secret path generated for the environment.
 

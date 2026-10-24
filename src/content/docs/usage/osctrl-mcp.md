@@ -32,7 +32,7 @@ USAGE:
    osctrl-mcp [global options]
 
 VERSION:
-   0.5.8
+   0.6.0
 
 GLOBAL OPTIONS:
    --api-url string                                                Base URL of osctrl-api, e.g. https://osctrl.example.com [$OSCTRL_API_URL]

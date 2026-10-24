@@ -69,7 +69,7 @@ you at the top-level prompt. The prompt reflects the active environment and,
 when you are inside a module, the module context:
 
 ```text
-🛡️  osctrl-cli interactive shell  v0.5.8
+🛡️  osctrl-cli interactive shell  v0.6.0
 📡  db mode
 💡  Type 'help' or '?' for help · 'exit' to quit
 
@@ -306,7 +306,7 @@ except `hidden` (a boolean) and `expiration` (an integer in hours).
 
 ```text
 $ ./osctrl-cli shell --db -D db.yml
-🛡️  osctrl-cli interactive shell  v0.5.8
+🛡️  osctrl-cli interactive shell  v0.6.0
 📡  db mode
 💡  Type 'help' or '?' for help · 'exit' to quit
 

@@ -46,7 +46,7 @@ Request body:
 
 Response:
 
-Plain-text osquery flags generated for that environment.
+Plain-text osquery flags for that environment: the flags stored for the environment (as edited by operators) with the secret and certificate paths filled in, or the generated defaults when none are stored. A [per-node flags override](/usage/node-overrides/) is merged in when one is set.
 
 ### Retrieve environment certificate
 
@@ -178,8 +178,39 @@ When `{arch}` is present, `osctrl-tls` first looks for an environment package ma
 
 Set `osquery.sha256` in `tls.yaml` only when every node installs the same osquery package artifact. For mixed fleets, leave it empty and pass the expected digest to osctrld on the node, because osquery publishes different packages per format and architecture.
 
+### Extensions
+
+When the environment has [osquery extensions](/usage/osquery-extensions/) assigned, osctrld lists them and downloads each binary:
+
+```properties
+POST /{env_uuid}/osctrld-extensions
+POST /{env_uuid}/osctrld-extension
+```
+
+Both take the environment secret like the other osctrld routes. The list also includes the extensions assigned to the node named in the request, and records the status osctrld reports for each.
+
+### Status report
+
+```properties
+POST /{env_uuid}/osctrld-status
+```
+
+The [osctrld daemon](/usage/osctrld-daemon/) reports whether `osqueryd` runs, since when it is down, its last flags and extensions rollback and its last osquery upgrade result. The body is limited to 4 KiB. A malformed body, a bad UUID or a UUID that is not a node of the environment gets `400`, never `404`. Rollbacks are counted once, audited with a warning and exported as [metrics](/components/metrics/#osctrld-metrics); the node page shows a banner while `osqueryd` is down.
+
+### osquery version
+
+```properties
+POST /{env_uuid}/osctrld-osquery
+```
+
+osctrld asks which osquery version to run: `{secret, uuid, platform, arch, format, installed_version}`. The response carries a `reason` (empty means upgrade, with the `target` version and SHA-256 and, except on Windows, the `previous` package), a `source` (`environment` or `pin`), a `request_id` and the node's `reported_version`. See [osquery upgrades](/usage/osquery-upgrades/).
+
+### Rate limits
+
+Every osctrld route is rate limited per client IP, and wrong secrets are limited per IP and environment. See [`rateLimits`](/configuration/#rate-limits-configuration) (`osctrldAuth`, `osctrld`, `osctrldDownload`).
+
 ## Notes
 
 * These endpoints are implemented inside `cmd/tls/main.go` and `cmd/tls/handlers/post.go` in the current upstream `develop` branch.
-* The default osctrld route names are `osctrld-flags`, `osctrld-cert`, `osctrld-verify` and `osctrld-script`.
+* The default osctrld route names are `osctrld-flags`, `osctrld-cert`, `osctrld-verify`, `osctrld-script`, `osctrld-extensions`, `osctrld-extension`, `osctrld-status` and `osctrld-osquery`.
 * The quick-link routes coexist with the standard osquery TLS routes such as `/{env}/enroll`, `/{env}/config`, `/{env}/log`, `/{env}/read`, `/{env}/write`, `/{env}/init` and `/{env}/block`.

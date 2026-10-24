@@ -24,7 +24,7 @@ You can specify a different configuration file using the `--config-file` or `-C`
 
 Only the `service`, `db` and `redis` sections are required — every other section (`rateLimits`, `osquery`, `saml`, `oidc`, `jwt`, `tls`, `logger`, `carver`, `debug`, and the osctrl-tls-only `batchWriter`, `configEndpoints`, `osctrld`, `metrics`) can be omitted entirely and the service falls back to its built-in defaults, or to values already stored in the database.
 
-Every generated config file also starts with a top-level `version: 4` field — the configuration schema version the file targets. It's checked against the version the running binary supports: an older or missing `version` logs a startup warning that fields added since may be missing, and a newer one warns that this binary ignores fields it doesn't know about. It's never fatal, just a heads-up to compare against a fresh `config-generate` output.
+Every generated config file also starts with a top-level `version: 5` field — the configuration schema version the file targets. It's checked against the version the running binary supports: an older or missing `version` logs a startup warning that fields added since may be missing, and a newer one warns that this binary ignores fields it doesn't know about. It's never fatal, just a heads-up to compare against a fresh `config-generate` output.
 
 ### Generating and Validating Configuration
 
@@ -80,7 +80,7 @@ The YAML configuration file contains the following main sections:
 Basic service settings including network listener, ports, authentication, and logging:
 
 ```yaml
-version: 4                          # Configuration schema version
+version: 5                          # Configuration schema version
 
 service:
   listener: "0.0.0.0"               # Network interface to bind to
@@ -198,9 +198,27 @@ rateLimits:
     evictAfter: 10m
     retryAfter: 60
     maxBuckets: 0
+  osctrldAuth:                      # Wrong osctrld secrets, per client IP and environment (osctrl-tls)
+    burst: 10
+    period: 1h
+    evictAfter: 2h
+    retryAfter: 360
+    maxBuckets: 0
+  osctrld:                          # Every osctrld request, per client IP (osctrl-tls)
+    burst: 300
+    period: 1m
+    evictAfter: 10m
+    retryAfter: 60
+    maxBuckets: 0
+  osctrldDownload:                  # osctrld extension downloads, per client IP (osctrl-tls)
+    burst: 30
+    period: 1m
+    evictAfter: 10m
+    retryAfter: 60
+    maxBuckets: 0
 ```
 
-`osctrl-api` only enforces `login`, `preAuth` and `serviceConfigApply`; `osctrl-tls` only enforces `enroll`. Every limiter still has to appear in both `tls.yaml` and `api.yaml` so the section has one shared shape and can round-trip through the [Service Configuration API](#service-configuration-api-and-restart) — the values the other service doesn't use are simply ignored.
+`osctrl-api` only enforces `login`, `preAuth` and `serviceConfigApply`; `osctrl-tls` only enforces `enroll`, `osctrldAuth`, `osctrld` and `osctrldDownload`. `osctrldAuth` is charged only by wrong secrets: once an address spends its budget it gets `429` on that environment's osctrld routes, even with the right secret, until it refills. The osctrld limits key on the client IP, so behind a reverse proxy set `service.trustedProxies` to the proxy's address, otherwise every client shares the proxy's budgets. Every limiter still has to appear in both `tls.yaml` and `api.yaml` so the section has one shared shape and can round-trip through the [Service Configuration API](#service-configuration-api-and-restart) — the values the other service doesn't use are simply ignored.
 
 #### Logger Configuration
 
@@ -222,7 +240,7 @@ logger:
   s3:
     bucket: "osctrl-logs"
     region: "us-east-1"
-    accessKey: "your-access-key"
+    accessKey: "your-access-key"    # Optional: leave both keys empty to use the default AWS credential chain (environment, shared config, IAM roles)
     secretAccessKey: "your-secret-key"
 
   # Splunk logger settings (if type: splunk)
@@ -285,7 +303,7 @@ File carving storage settings:
 
 ```yaml
 carver:
-  type: "db"                        # Carver type: db, s3, local
+  type: "db"                        # Carver type: db, s3
 
   # S3 carver settings (if type: s3)
   s3:
@@ -293,17 +311,13 @@ carver:
     region: "us-east-1"
     accessKey: "your-access-key"
     secretAccessKey: "your-secret-key"
-
-  # Local carver settings (if type: local)
-  local:
-    carvesDir: "/var/osctrl/carves" # Directory to store carved files
 ```
 
 **Carver types**:
 
 * `db` - Store carved files in the database
 * `s3` - Upload carved files to AWS S3
-* `local` - Store carved files in local directory
+The `local` carver was never implemented and is now rejected at startup; use `db` or `s3`.
 
 #### TLS Configuration
 
@@ -461,7 +475,7 @@ Set `service.serviceConfigEnabled: true` (`osctrl-api` only) to expose `/api/v1/
 #### osctrl-tls (tls.yaml)
 
 ```yaml
-version: 4
+version: 5
 
 service:
   listener: "0.0.0.0"

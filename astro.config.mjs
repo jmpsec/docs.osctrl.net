@@ -100,6 +100,8 @@ export default defineConfig({
             'usage/osctrl-api',
             'usage/osctrl-mcp',
             'usage/vulnerabilities',
+            'usage/node-overrides',
+            'usage/osquery-extensions',
             'usage/auth-providers',
             {
               label: 'osctrl-cli',
@@ -123,6 +125,8 @@ export default defineConfig({
               ],
             },
             'usage/osctrld',
+            'usage/osctrld-daemon',
+            'usage/osquery-upgrades',
             'usage/provision.sh',
           ],
         },
