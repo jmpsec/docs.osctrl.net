@@ -66,8 +66,11 @@ Optional Parameters:
   -N NAME     --env NAME 	Initial environment name to be created. Default is the mode (dev or prod)
   -U          --upgrade 	Keep osctrl upgraded with the latest code from GitHub
   -A          --admin 	Create and configure an admin user with a random password. Default is disabled
+              --prepare 	Install build/runtime dependencies and exit without deploying services
 
 Examples:
+  Prepare a machine (ubuntu, debian or centos) without deploying services:
+	./deploy/provision.sh --prepare
   Provision service in development mode, code is in /code/osctrl and all components (frontend, tls, api):
 	./deploy/provision.sh -m dev -s /code/osctrl -p all
   Provision service in production mode using my own certificate and only with TLS endpoint:
@@ -75,3 +78,5 @@ Examples:
   Upgrade service with the latest code from GitHub. Does not create services nor certificates:
 	./deploy/provision.sh -U -s /code/osctrl -S /srv/osctrl
 ```
+
+`--prepare` installs the compilers and tools needed to build and run osctrl (and Go and nvm when missing), then exits before any deployment or service configuration. Running the script again with `--admin` against an existing admin user updates its password instead of failing, and option values for `--mode`, `--type` and `--part` must now match exactly.

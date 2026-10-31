@@ -33,16 +33,27 @@ osctrld:
   extensionsDir: "/path/to/extensions/"    # configuration file only
 ```
 
-JSON files work too. Supplying a configuration file replaces the whole effective configuration, so it wins over flags and environment variables for every field. Keep the file `0600`: it holds the enrollment secret. The packages (deb, rpm, apk) install the binary, the systemd unit and the configuration; on macOS the launchd plist runs `/usr/local/bin/osctrld`.
+Paths default to the osquery directory of the OS; set them only with absolute paths (a relative path resolves against `/` under systemd and launchd and logs a warning). Other fields: `osquerySHA256`, `osqueryPackage` and `allowUnverified` for `install`. JSON files work too.
+
+**Precedence:** when a configuration file is used (`--config` or `OSCTRL_CONFIG`) it replaces the entire effective configuration: every other flag and environment variable is ignored, even for fields the file leaves unset, and osctrld logs one warning naming the ignored ones (never their values). Without a file, flags win over environment variables. Set `interval` in the file, since `--interval` is ignored with `--config`. Unknown keys are ignored with a warning naming them. Keep the file `0600`: it holds the enrollment secret. The packages (deb, rpm, apk) install the binary, the systemd unit and the configuration; on macOS the launchd plist runs `/usr/local/bin/osctrld`.
 
 ## Native install
 
 `osctrld install` does what the quick-add script does without a shell. The osquery package is verified before installation: the SHA-256 comes from osctrl when it has one, else from `--osquery-sha256`; with neither, install is refused unless `--allow-unverified` is passed. `--osquery-package` points to a mirror for air-gapped installs, and only then does `--insecure` apply to the package download.
 
 ```bash
-sudo osctrld --secret <secret> --environment <environment-uuid> --osctrl-url https://osctrl.example.com \
+sudo --preserve-env=OSCTRL_SECRET osctrld --environment <environment-uuid> --osctrl-url https://osctrl.example.com \
   --osquery-sha256 <sha256-of-the-package> install
 ```
+
+## Hardening
+
+- **HTTPS:** use an `https` `baseurl`, since requests carry the enrollment secret; `http://` still works but logs a warning (also shown by `check-config`). `baseurl` can't carry a query or fragment. Credentials in it are sent as Basic auth (for a reverse proxy) but are discouraged.
+- **Redirects:** requests to osctrl follow redirects only within the same scheme, host and port, or from http to https on the same host; package downloads may follow https redirects to another host (a CDN). Nothing may go from https to http. `HTTPS_PROXY`, `HTTP_PROXY` and `NO_PROXY` are honored.
+- **Secret handling:** don't pass `--secret`, which is visible in the process list and shell history. Use a root-only configuration file or the `OSCTRL_SECRET` environment variable (with `sudo --preserve-env=OSCTRL_SECRET`).
+- **Files:** secret `0600`, flags and certificate `0700`; on Windows the secret gets a protected ACL for SYSTEM and Administrators only. Every file is written to a temp file and renamed, and a symlink in its place is replaced, never written through. osctrld warns when it runs as root with a config file others can write.
+- **Windows:** the extensions directory must be owned by SYSTEM, Administrators or TrustedInstaller with no other account able to write, create or delete in it; the default `C:\Program Files\osquery` qualifies, a folder under `C:\ProgramData` does not.
+- **Uninstall:** `uninstall` also deletes osctrld's own state files next to the flagfile and the upgrade directory (its snapshot holds the secret). Installed extensions and their `extensions.load` lines stay and must be removed by hand.
 
 ## Flags and rollback
 

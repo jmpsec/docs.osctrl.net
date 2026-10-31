@@ -1,6 +1,6 @@
 ---
 title: "Using Docker"
-description: "Run osctrl and all its components locally with Docker Compose using the docker-compose-dev.yml stack."
+description: "Run osctrl and all its components with Docker Compose: the development stack and the staging stack built from published images."
 sidebar:
   order: 2
 ---
@@ -70,3 +70,36 @@ make docker_dev_clean
 Removes osctrl Docker images and volumes. Use it when you want a fresh database and clean containers.
 
 For production deployments, prefer the native Ubuntu path with `provision.sh` or adapt the compose file to your own orchestration, secrets, certificates, and persistence model.
+
+## Staging (published release)
+
+`docker-compose-staging.yml` runs the four published Docker Hub images (`osctrl-tls`, `osctrl-api`, `osctrl-cli`, `osctrl-frontend`) instead of building from source. Use a release that publishes all four, such as `0.6.2`.
+
+```bash
+cp .env.staging.example .env.staging
+make docker_staging_certs   # local self-signed certificate; refuses to overwrite
+make docker_staging
+```
+
+Edit `.env.staging` first: set `OSCTRL_VERSION` (the image tag, without a leading `v`), independent random values for `JWT_SECRET` (at least 32 bytes), `POSTGRES_DB_PASSWORD` and `OSCTRL_PASS`, and `OSCTRL_USER`. Empty required values fail before Compose starts. Generate secrets with `openssl rand -hex 32`.
+
+| Surface | URL |
+| --- | --- |
+| Operator frontend and `/api/*` | `https://localhost:9444` |
+| osquery TLS endpoint | `https://localhost:9443` |
+| PostgreSQL | `localhost:15432` |
+| Redis | `localhost:16379` |
+
+Everything binds to loopback by default. For a remote host set `STAGING_BIND_ADDRESS`, `STAGING_TLS_HOST`, `STAGING_FRONTEND_HOST` and a matching certificate (`STAGING_TLS_CERT`, `STAGING_TLS_KEY`) **before the first bootstrap**, since existing environment settings are preserved on later starts.
+
+The bootstrap container creates the `staging` environment and the administrator if absent, then exits; later starts keep the data, and changing `OSCTRL_PASS` does not reset an existing password. The stack runs in the `osctrl-staging` Compose project, so it can run next to the development stack.
+
+```bash
+make docker_staging_pull    # download the selected images
+make docker_staging_up      # pull and start in the background
+make docker_staging_logs
+make docker_staging_down    # stop, keep volumes
+make docker_staging_check   # deployment contract tests, no daemon needed
+```
+
+To change release, back up the database, edit `OSCTRL_VERSION` and run `make docker_staging`. Startup migrates the schema, so going back to an older tag is not a rollback; restore a backup instead. Don't use `docker_dev_clean` while keeping staging data: it matches every osctrl image and volume.

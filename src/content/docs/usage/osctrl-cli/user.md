@@ -375,3 +375,12 @@ GLOBAL OPTIONS:
    --silent, -s                       Silent mode
    --version, -v                      Print version information
 ```
+
+## Safeguards
+
+These apply in both `--db` and `--api` modes:
+
+* `user add -e <environment>` accepts a name or UUID and fails before creating anything if the environment doesn't exist. The user and its permissions are created in one transaction, so there are no half-created users.
+* Permissions can't be granted on an empty environment; such rows grant nothing and are refused.
+* With `--db`, removing admin from a user, or deleting a super-admin, is refused if it would leave no super-admin (the same lockout policy as the API: self-demotion is refused with 403 and the last super-admin with 409).
+* `user delete` removes the user's permissions and MFA factors along with the account.

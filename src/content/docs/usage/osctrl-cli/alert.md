@@ -134,7 +134,7 @@ OPTIONS:
    --help, -h                show help
 ```
 
-`--config` takes the channel's field values as a JSON object. For `webhook`: `{"url": "...", "secret": "...", "timeoutSeconds": 10, "insecureSkipVerify": false, "allowPrivateTargets": false}` (only `url` is required). For `email`: `{"host": "...", "port": 587, "username": "...", "password": "...", "from": "...", "to": "a@example.com,b@example.com", "starttls": true}` (`host`, `from` and `to` are required).
+`--config` takes the channel's field values as a JSON object. For webhooks, `url` and `secret` are both treated as secrets: stored redacted and shown as `***` after saving, since Slack and Teams hooks carry their token in the URL path. For `webhook`: `{"url": "...", "secret": "...", "timeoutSeconds": 10, "insecureSkipVerify": false, "allowPrivateTargets": false}` (only `url` is required). For `email`: `{"host": "...", "port": 587, "username": "...", "password": "...", "from": "...", "to": "a@example.com,b@example.com", "starttls": true}` (`host`, `from` and `to` are required).
 
 ```bash
 ./osctrl-cli alert channel-create --api -n oncall-webhook -t webhook \

@@ -104,7 +104,7 @@ For log-based sources, `matchType` is `substring` (case-insensitive) or `regex`,
 
 Two channel types are available, each with its own dynamic config form and a "test" button to send a synthetic notification before saving:
 
-* **Webhook** — HTTPS/HTTP POST of the alert as JSON, optionally HMAC-signed (`secret`); refuses to target loopback/private/link-local addresses unless `allowPrivateTargets` is set, and retries transient failures with backoff.
+* **Webhook** — HTTPS/HTTP POST of the alert as JSON, optionally HMAC-signed (`secret`). The URL is treated as a secret and shown as `***` after saving; refuses to target loopback/private/link-local addresses unless `allowPrivateTargets` is set, and retries transient failures with backoff.
 * **Email** — SMTP delivery (`host`, `port`, `username`, `password`, `from`, `to`, `starttls`).
 
 The **Rules**, **Channels** and **History** tabs cover rule/channel CRUD and a log of dispatched alerts; an **Apply** action hot-reloads the current rules/channels into `osctrl-tls` without a restart.
