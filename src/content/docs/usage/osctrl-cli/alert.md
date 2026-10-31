@@ -28,8 +28,8 @@ OPTIONS:
    --help, -h  show help
 
 GLOBAL OPTIONS:
-   --db, -d                           Connect to local osctrl DB using YAML config file [$DB_CONFIG]
-   --api, -a                          Connect to remote osctrl using JSON config file [$API_CONFIG]
+   --db, -d                           Connect to local osctrl DB using YAML config file (required by db-only commands: settings add, settings delete). DB-mode environment edits do not invalidate the shared Redis environment cache: osctrl-api/osctrl-tls may serve the old environment for up to 5 minutes [$DB_CONFIG]
+   --api, -a                          Connect to remote osctrl using JSON config file (the default; every command except settings add/delete also works with --db; ignored when --db is set) [$API_CONFIG]
    --api-file FILE, -A FILE           Load API JSON configuration from FILE (default: "osctrl-api.json") [$API_CONFIG_FILE]
    --api-url string, -U string        The URL for osctrl API to be used [$API_URL]
    --api-token string, -T string      Token to authenticate with the osctrl API [$API_TOKEN]
@@ -45,7 +45,7 @@ GLOBAL OPTIONS:
    --insecure, -i                     Allow insecure server connections when using SSL
    --verbose, -V                      Increase output verbosity for debugging
    --output-format string, -o string  Format to be used for data output (default: "pretty") [$OUTPUT_FORMAT]
-   --silent, -s                       Silent mode
+   --silent, -s                       Silent mode: suppress output and skip confirmation prompts
    --version, -v                      Print version information
 ```
 
@@ -60,7 +60,29 @@ USAGE:
    osctrl-cli alert rules [options]
 
 OPTIONS:
-   --help, -h  show help
+   --environment uint, -e uint  Only rules of this environment ID (default: 0)
+   --help, -h                   show help
+
+GLOBAL OPTIONS:
+   --db, -d                           Connect to local osctrl DB using YAML config file (required by db-only commands: settings add, settings delete). DB-mode environment edits do not invalidate the shared Redis environment cache: osctrl-api/osctrl-tls may serve the old environment for up to 5 minutes [$DB_CONFIG]
+   --api, -a                          Connect to remote osctrl using JSON config file (the default; every command except settings add/delete also works with --db; ignored when --db is set) [$API_CONFIG]
+   --api-file FILE, -A FILE           Load API JSON configuration from FILE (default: "osctrl-api.json") [$API_CONFIG_FILE]
+   --api-url string, -U string        The URL for osctrl API to be used [$API_URL]
+   --api-token string, -T string      Token to authenticate with the osctrl API [$API_TOKEN]
+   --db-file FILE, -D FILE            Load DB YAML configuration from FILE [$DB_CONFIG_FILE]
+   --db-host string                   Backend host to be connected to (default: "127.0.0.1") [$DB_HOST]
+   --db-port int                      Backend port to be connected to (default: 5432) [$DB_PORT]
+   --db-name string                   Database name to be used in the backend (default: "osctrl") [$DB_NAME]
+   --db-user string                   Username to be used for the backend (default: "postgres") [$DB_USER]
+   --db-pass string                   Password to be used for the backend (default: "postgres") [$DB_PASS]
+   --db-max-idle-conns int            Maximum number of connections in the idle connection pool (default: 20) [$DB_MAX_IDLE_CONNS]
+   --db-max-open-conns int            Maximum number of open connections to the database (default: 100) [$DB_MAX_OPEN_CONNS]
+   --db-conn-max-lifetime int         Maximum amount of time a connection may be reused (default: 30) [$DB_CONN_MAX_LIFETIME]
+   --insecure, -i                     Allow insecure server connections when using SSL
+   --verbose, -V                      Increase output verbosity for debugging
+   --output-format string, -o string  Format to be used for data output (default: "pretty") [$OUTPUT_FORMAT]
+   --silent, -s                       Silent mode: suppress output and skip confirmation prompts
+   --version, -v                      Print version information
 ```
 
 ## Create rule
@@ -75,14 +97,38 @@ USAGE:
 
 OPTIONS:
    --name string, -n string         Rule name
-   --source string, -s string       Source: result_log | status_log | query_log | node_inactive | node_recovered
+   --source string, -s string       Source: result_log | status_log | query_log | node_inactive | node_recovered | vuln_finding
    --match-type string, -m string   Match type: substring | regex (default: "substring")
    --match-field string             Field to match (empty = any field)
    --match-value string, -v string  Pattern to match
    --cooldown int                   Cooldown minutes between repeat alerts (default: 0)
    --channels string                Comma-separated channel IDs
    --enabled                        Create the rule enabled
+   --environment uint, -e uint      Environment ID (0 = global) (default: 0)
+   --node-uuid string               Only match this node (empty = all nodes)
+   --status-severity string         Status log severity: error | warning | any
+   --vuln-min-severity string       Vulnerability threshold: kev | critical | high | medium | low | any
+   --info string                    Free-form description
    --help, -h                       show help
+
+GLOBAL OPTIONS:
+   --db, -d                           Connect to local osctrl DB using YAML config file (required by db-only commands: settings add, settings delete). DB-mode environment edits do not invalidate the shared Redis environment cache: osctrl-api/osctrl-tls may serve the old environment for up to 5 minutes [$DB_CONFIG]
+   --api, -a                          Connect to remote osctrl using JSON config file (the default; every command except settings add/delete also works with --db; ignored when --db is set) [$API_CONFIG]
+   --api-file FILE, -A FILE           Load API JSON configuration from FILE (default: "osctrl-api.json") [$API_CONFIG_FILE]
+   --api-url string, -U string        The URL for osctrl API to be used [$API_URL]
+   --api-token string, -T string      Token to authenticate with the osctrl API [$API_TOKEN]
+   --db-file FILE, -D FILE            Load DB YAML configuration from FILE [$DB_CONFIG_FILE]
+   --db-host string                   Backend host to be connected to (default: "127.0.0.1") [$DB_HOST]
+   --db-port int                      Backend port to be connected to (default: 5432) [$DB_PORT]
+   --db-name string                   Database name to be used in the backend (default: "osctrl") [$DB_NAME]
+   --db-user string                   Username to be used for the backend (default: "postgres") [$DB_USER]
+   --db-pass string                   Password to be used for the backend (default: "postgres") [$DB_PASS]
+   --db-max-idle-conns int            Maximum number of connections in the idle connection pool (default: 20) [$DB_MAX_IDLE_CONNS]
+   --db-max-open-conns int            Maximum number of open connections to the database (default: 100) [$DB_MAX_OPEN_CONNS]
+   --db-conn-max-lifetime int         Maximum amount of time a connection may be reused (default: 30) [$DB_CONN_MAX_LIFETIME]
+   --insecure, -i                     Allow insecure server connections when using SSL
+   --verbose, -V                      Increase output verbosity for debugging
+   --output-format string, -o string  Format to be used for data output (default: "pretty") [$OUTPUT_FORMAT]
 ```
 
 `--match-field` empty tries every column of the row (or every status/query-result field). `--cooldown 0` uses the system default of 15 minutes. `node_inactive` and `node_recovered` rules ignore `--match-type`/`--match-field`/`--match-value` — they fire on the node's active/inactive state transition itself, not on log content.
@@ -100,6 +146,27 @@ USAGE:
 OPTIONS:
    --id uint   Rule ID (default: 0)
    --help, -h  show help
+
+GLOBAL OPTIONS:
+   --db, -d                           Connect to local osctrl DB using YAML config file (required by db-only commands: settings add, settings delete). DB-mode environment edits do not invalidate the shared Redis environment cache: osctrl-api/osctrl-tls may serve the old environment for up to 5 minutes [$DB_CONFIG]
+   --api, -a                          Connect to remote osctrl using JSON config file (the default; every command except settings add/delete also works with --db; ignored when --db is set) [$API_CONFIG]
+   --api-file FILE, -A FILE           Load API JSON configuration from FILE (default: "osctrl-api.json") [$API_CONFIG_FILE]
+   --api-url string, -U string        The URL for osctrl API to be used [$API_URL]
+   --api-token string, -T string      Token to authenticate with the osctrl API [$API_TOKEN]
+   --db-file FILE, -D FILE            Load DB YAML configuration from FILE [$DB_CONFIG_FILE]
+   --db-host string                   Backend host to be connected to (default: "127.0.0.1") [$DB_HOST]
+   --db-port int                      Backend port to be connected to (default: 5432) [$DB_PORT]
+   --db-name string                   Database name to be used in the backend (default: "osctrl") [$DB_NAME]
+   --db-user string                   Username to be used for the backend (default: "postgres") [$DB_USER]
+   --db-pass string                   Password to be used for the backend (default: "postgres") [$DB_PASS]
+   --db-max-idle-conns int            Maximum number of connections in the idle connection pool (default: 20) [$DB_MAX_IDLE_CONNS]
+   --db-max-open-conns int            Maximum number of open connections to the database (default: 100) [$DB_MAX_OPEN_CONNS]
+   --db-conn-max-lifetime int         Maximum amount of time a connection may be reused (default: 30) [$DB_CONN_MAX_LIFETIME]
+   --insecure, -i                     Allow insecure server connections when using SSL
+   --verbose, -V                      Increase output verbosity for debugging
+   --output-format string, -o string  Format to be used for data output (default: "pretty") [$OUTPUT_FORMAT]
+   --silent, -s                       Silent mode: suppress output and skip confirmation prompts
+   --version, -v                      Print version information
 ```
 
 ## List channels
@@ -114,6 +181,27 @@ USAGE:
 
 OPTIONS:
    --help, -h  show help
+
+GLOBAL OPTIONS:
+   --db, -d                           Connect to local osctrl DB using YAML config file (required by db-only commands: settings add, settings delete). DB-mode environment edits do not invalidate the shared Redis environment cache: osctrl-api/osctrl-tls may serve the old environment for up to 5 minutes [$DB_CONFIG]
+   --api, -a                          Connect to remote osctrl using JSON config file (the default; every command except settings add/delete also works with --db; ignored when --db is set) [$API_CONFIG]
+   --api-file FILE, -A FILE           Load API JSON configuration from FILE (default: "osctrl-api.json") [$API_CONFIG_FILE]
+   --api-url string, -U string        The URL for osctrl API to be used [$API_URL]
+   --api-token string, -T string      Token to authenticate with the osctrl API [$API_TOKEN]
+   --db-file FILE, -D FILE            Load DB YAML configuration from FILE [$DB_CONFIG_FILE]
+   --db-host string                   Backend host to be connected to (default: "127.0.0.1") [$DB_HOST]
+   --db-port int                      Backend port to be connected to (default: 5432) [$DB_PORT]
+   --db-name string                   Database name to be used in the backend (default: "osctrl") [$DB_NAME]
+   --db-user string                   Username to be used for the backend (default: "postgres") [$DB_USER]
+   --db-pass string                   Password to be used for the backend (default: "postgres") [$DB_PASS]
+   --db-max-idle-conns int            Maximum number of connections in the idle connection pool (default: 20) [$DB_MAX_IDLE_CONNS]
+   --db-max-open-conns int            Maximum number of open connections to the database (default: 100) [$DB_MAX_OPEN_CONNS]
+   --db-conn-max-lifetime int         Maximum amount of time a connection may be reused (default: 30) [$DB_CONN_MAX_LIFETIME]
+   --insecure, -i                     Allow insecure server connections when using SSL
+   --verbose, -V                      Increase output verbosity for debugging
+   --output-format string, -o string  Format to be used for data output (default: "pretty") [$OUTPUT_FORMAT]
+   --silent, -s                       Silent mode: suppress output and skip confirmation prompts
+   --version, -v                      Print version information
 ```
 
 ## Create channel
@@ -127,11 +215,34 @@ USAGE:
    osctrl-cli alert channel-create [options]
 
 OPTIONS:
-   --name string, -n string  Channel name
-   --type string, -t string  Channel type: webhook | email
-   --config string           Channel config as JSON
-   --enabled                 Create the channel enabled
-   --help, -h                show help
+   --name string, -n string     Channel name
+   --type string, -t string     Channel type: webhook | email
+   --config string              Channel config as JSON
+   --enabled                    Create the channel enabled
+   --environment uint, -e uint  Environment ID (0 = global) (default: 0)
+   --info string                Free-form description
+   --help, -h                   show help
+
+GLOBAL OPTIONS:
+   --db, -d                           Connect to local osctrl DB using YAML config file (required by db-only commands: settings add, settings delete). DB-mode environment edits do not invalidate the shared Redis environment cache: osctrl-api/osctrl-tls may serve the old environment for up to 5 minutes [$DB_CONFIG]
+   --api, -a                          Connect to remote osctrl using JSON config file (the default; every command except settings add/delete also works with --db; ignored when --db is set) [$API_CONFIG]
+   --api-file FILE, -A FILE           Load API JSON configuration from FILE (default: "osctrl-api.json") [$API_CONFIG_FILE]
+   --api-url string, -U string        The URL for osctrl API to be used [$API_URL]
+   --api-token string, -T string      Token to authenticate with the osctrl API [$API_TOKEN]
+   --db-file FILE, -D FILE            Load DB YAML configuration from FILE [$DB_CONFIG_FILE]
+   --db-host string                   Backend host to be connected to (default: "127.0.0.1") [$DB_HOST]
+   --db-port int                      Backend port to be connected to (default: 5432) [$DB_PORT]
+   --db-name string                   Database name to be used in the backend (default: "osctrl") [$DB_NAME]
+   --db-user string                   Username to be used for the backend (default: "postgres") [$DB_USER]
+   --db-pass string                   Password to be used for the backend (default: "postgres") [$DB_PASS]
+   --db-max-idle-conns int            Maximum number of connections in the idle connection pool (default: 20) [$DB_MAX_IDLE_CONNS]
+   --db-max-open-conns int            Maximum number of open connections to the database (default: 100) [$DB_MAX_OPEN_CONNS]
+   --db-conn-max-lifetime int         Maximum amount of time a connection may be reused (default: 30) [$DB_CONN_MAX_LIFETIME]
+   --insecure, -i                     Allow insecure server connections when using SSL
+   --verbose, -V                      Increase output verbosity for debugging
+   --output-format string, -o string  Format to be used for data output (default: "pretty") [$OUTPUT_FORMAT]
+   --silent, -s                       Silent mode: suppress output and skip confirmation prompts
+   --version, -v                      Print version information
 ```
 
 `--config` takes the channel's field values as a JSON object. For webhooks, `url` and `secret` are both treated as secrets: stored redacted and shown as `***` after saving, since Slack and Teams hooks carry their token in the URL path. For `webhook`: `{"url": "...", "secret": "...", "timeoutSeconds": 10, "insecureSkipVerify": false, "allowPrivateTargets": false}` (only `url` is required). For `email`: `{"host": "...", "port": 587, "username": "...", "password": "...", "from": "...", "to": "a@example.com,b@example.com", "starttls": true}` (`host`, `from` and `to` are required).
@@ -154,6 +265,27 @@ USAGE:
 OPTIONS:
    --id uint   Channel ID (default: 0)
    --help, -h  show help
+
+GLOBAL OPTIONS:
+   --db, -d                           Connect to local osctrl DB using YAML config file (required by db-only commands: settings add, settings delete). DB-mode environment edits do not invalidate the shared Redis environment cache: osctrl-api/osctrl-tls may serve the old environment for up to 5 minutes [$DB_CONFIG]
+   --api, -a                          Connect to remote osctrl using JSON config file (the default; every command except settings add/delete also works with --db; ignored when --db is set) [$API_CONFIG]
+   --api-file FILE, -A FILE           Load API JSON configuration from FILE (default: "osctrl-api.json") [$API_CONFIG_FILE]
+   --api-url string, -U string        The URL for osctrl API to be used [$API_URL]
+   --api-token string, -T string      Token to authenticate with the osctrl API [$API_TOKEN]
+   --db-file FILE, -D FILE            Load DB YAML configuration from FILE [$DB_CONFIG_FILE]
+   --db-host string                   Backend host to be connected to (default: "127.0.0.1") [$DB_HOST]
+   --db-port int                      Backend port to be connected to (default: 5432) [$DB_PORT]
+   --db-name string                   Database name to be used in the backend (default: "osctrl") [$DB_NAME]
+   --db-user string                   Username to be used for the backend (default: "postgres") [$DB_USER]
+   --db-pass string                   Password to be used for the backend (default: "postgres") [$DB_PASS]
+   --db-max-idle-conns int            Maximum number of connections in the idle connection pool (default: 20) [$DB_MAX_IDLE_CONNS]
+   --db-max-open-conns int            Maximum number of open connections to the database (default: 100) [$DB_MAX_OPEN_CONNS]
+   --db-conn-max-lifetime int         Maximum amount of time a connection may be reused (default: 30) [$DB_CONN_MAX_LIFETIME]
+   --insecure, -i                     Allow insecure server connections when using SSL
+   --verbose, -V                      Increase output verbosity for debugging
+   --output-format string, -o string  Format to be used for data output (default: "pretty") [$OUTPUT_FORMAT]
+   --silent, -s                       Silent mode: suppress output and skip confirmation prompts
+   --version, -v                      Print version information
 ```
 
 ## Apply
@@ -168,6 +300,27 @@ USAGE:
 
 OPTIONS:
    --help, -h  show help
+
+GLOBAL OPTIONS:
+   --db, -d                           Connect to local osctrl DB using YAML config file (required by db-only commands: settings add, settings delete). DB-mode environment edits do not invalidate the shared Redis environment cache: osctrl-api/osctrl-tls may serve the old environment for up to 5 minutes [$DB_CONFIG]
+   --api, -a                          Connect to remote osctrl using JSON config file (the default; every command except settings add/delete also works with --db; ignored when --db is set) [$API_CONFIG]
+   --api-file FILE, -A FILE           Load API JSON configuration from FILE (default: "osctrl-api.json") [$API_CONFIG_FILE]
+   --api-url string, -U string        The URL for osctrl API to be used [$API_URL]
+   --api-token string, -T string      Token to authenticate with the osctrl API [$API_TOKEN]
+   --db-file FILE, -D FILE            Load DB YAML configuration from FILE [$DB_CONFIG_FILE]
+   --db-host string                   Backend host to be connected to (default: "127.0.0.1") [$DB_HOST]
+   --db-port int                      Backend port to be connected to (default: 5432) [$DB_PORT]
+   --db-name string                   Database name to be used in the backend (default: "osctrl") [$DB_NAME]
+   --db-user string                   Username to be used for the backend (default: "postgres") [$DB_USER]
+   --db-pass string                   Password to be used for the backend (default: "postgres") [$DB_PASS]
+   --db-max-idle-conns int            Maximum number of connections in the idle connection pool (default: 20) [$DB_MAX_IDLE_CONNS]
+   --db-max-open-conns int            Maximum number of open connections to the database (default: 100) [$DB_MAX_OPEN_CONNS]
+   --db-conn-max-lifetime int         Maximum amount of time a connection may be reused (default: 30) [$DB_CONN_MAX_LIFETIME]
+   --insecure, -i                     Allow insecure server connections when using SSL
+   --verbose, -V                      Increase output verbosity for debugging
+   --output-format string, -o string  Format to be used for data output (default: "pretty") [$OUTPUT_FORMAT]
+   --silent, -s                       Silent mode: suppress output and skip confirmation prompts
+   --version, -v                      Print version information
 ```
 
 Queues a hot-reload of the current rules and channels into `osctrl-tls`, without restarting it — run this after creating or deleting rules/channels so the running service picks them up.

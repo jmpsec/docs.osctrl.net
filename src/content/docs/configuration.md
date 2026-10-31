@@ -180,11 +180,14 @@ What [osctrl-api](/components/osctrl-api/) reads from the replica:
 * Vulnerability views: findings, summary, advisories, per-node report and feed status.
 * Posture data: risk level and uptime in the node list and node detail, and the node posture page.
 
-Everything else stays on the primary: authentication, permissions, enrollment, node-key lookups, query and carve lists and detail pages (a lagging replica could return a 404 right after a query is created), posture checks and profiles, node tags, TLS alerts and the [CLI](/usage/osctrl-cli/). Only display paths move, so a just-recorded audit entry or posture result may appear a little later.
+Everything else stays on the primary: authentication, permissions, enrollment, node-key lookups, query and carve lists and detail pages (a lagging replica could return a 404 right after a query is created), posture checks and profiles, node tags, the osquery and osctrld request paths and the [CLI](/usage/osctrl-cli/). Only display paths move, so a just-recorded audit entry or posture result may appear a little later.
 
-:::note
-[osctrl-tls](/components/osctrl-tls/) accepts the same settings and opens the connection, but routes no reads to the replica yet, and logs a warning saying so. Enable it there only if you want the connection checked by the health monitor; for now the benefit is in osctrl-api.
-:::
+What [osctrl-tls](/components/osctrl-tls/) reads from the replica:
+
+* The node scans behind [alert rules](/usage/osctrl-cli/alert/).
+* The osctrld Prometheus gauges (osqueryd down, osquery behind its target version, paused rollouts), see [metrics](/components/metrics/).
+
+Everything osquery and osctrld agents request (enrollment, configuration, logs, queries, carves) stays on the primary.
 
 #### Redis Configuration
 

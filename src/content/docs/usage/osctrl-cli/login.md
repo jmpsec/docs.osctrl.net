@@ -22,10 +22,9 @@ OPTIONS:
    --help, -h                       show help
 
 GLOBAL OPTIONS:
-   --db, -d                           Connect to local osctrl DB using YAML config file [$DB_CONFIG]
-   --api, -a                          Connect to remote osctrl using JSON config file [$API_CONFIG]
+   --db, -d                           Connect to local osctrl DB using YAML config file (required by db-only commands: settings add, settings delete). DB-mode environment edits do not invalidate the shared Redis environment cache: osctrl-api/osctrl-tls may serve the old environment for up to 5 minutes [$DB_CONFIG]
+   --api, -a                          Connect to remote osctrl using JSON config file (the default; every command except settings add/delete also works with --db; ignored when --db is set) [$API_CONFIG]
    --api-file FILE, -A FILE           Load API JSON configuration from FILE (default: "osctrl-api.json") [$API_CONFIG_FILE]
-   --api-url string, -U string        The URL for osctrl API to be used [$API_URL]
    --api-token string, -T string      Token to authenticate with the osctrl API [$API_TOKEN]
    --db-file FILE, -D FILE            Load DB YAML configuration from FILE [$DB_CONFIG_FILE]
    --db-host string                   Backend host to be connected to (default: "127.0.0.1") [$DB_HOST]
@@ -39,6 +38,6 @@ GLOBAL OPTIONS:
    --insecure, -i                     Allow insecure server connections when using SSL
    --verbose, -V                      Increase output verbosity for debugging
    --output-format string, -o string  Format to be used for data output (default: "pretty") [$OUTPUT_FORMAT]
-   --silent, -s                       Silent mode
+   --silent, -s                       Silent mode: suppress output and skip confirmation prompts
    --version, -v                      Print version information
 ```
