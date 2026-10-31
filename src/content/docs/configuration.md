@@ -150,7 +150,41 @@ db:
   connMaxLifetime: 30               # Connection max lifetime (minutes)
   connRetry: 5                      # Connection retry timeout (seconds, 0=no retry)
   filePath: "./osctrl.db"           # For SQLite only
+  read:                             # Optional read replica (off by default)
+    enabled: false
+    host: ""                        # Empty fields inherit the primary's value
+    port: 0
+    username: ""
+    password: ""
+    sslmode: ""
+    maxIdleConns: 0
+    maxOpenConns: 0
 ```
+
+##### Read replica
+
+With `db.read.enabled: true`, a service opens a second connection pool to a read replica of the database. Reads that tolerate a little replication lag go to the replica, which takes load off the primary that also serves the write path (check-ins, query results, enrollment). It is off by default, and with it off nothing changes.
+
+* Any `db.read` field left empty (or `0`) inherits the primary's value, so a replica on another host usually needs only `enabled` and `host`.
+* The database type, database name and `connMaxLifetime` always follow the primary.
+* SQLite is not supported: the service refuses to start with `db.read.enabled` set.
+* If the replica cannot be reached at startup, the service fails or retries the same way as it does for the primary (see `connRetry`).
+* The [database health check](/usage/osctrl-api/) pings both pools, so a replica outage marks the service as degraded even though the primary still accepts writes.
+* The replica password is handled like the primary's `db.password`: set it through the environment (`DB_READ_PASS`) or a protected config file.
+
+What [osctrl-api](/components/osctrl-api/) reads from the replica:
+
+* The dashboard: node stats, platform and osquery version counts, active query and carve counts, and the environment activity chart.
+* Node lists (active, inactive, all, and the paged and searchable list) and the activity chart on the node detail page.
+* The audit log list.
+* Vulnerability views: findings, summary, advisories, per-node report and feed status.
+* Posture data: risk level and uptime in the node list and node detail, and the node posture page.
+
+Everything else stays on the primary: authentication, permissions, enrollment, node-key lookups, query and carve lists and detail pages (a lagging replica could return a 404 right after a query is created), posture checks and profiles, node tags, TLS alerts and the [CLI](/usage/osctrl-cli/). Only display paths move, so a just-recorded audit entry or posture result may appear a little later.
+
+:::note
+[osctrl-tls](/components/osctrl-tls/) accepts the same settings and opens the connection, but routes no reads to the replica yet, and logs a warning saying so. Enable it there only if you want the connection checked by the health monitor; for now the benefit is in osctrl-api.
+:::
 
 #### Redis Configuration
 
@@ -517,6 +551,8 @@ db:
   maxOpenConns: 100
   connMaxLifetime: 30
   connRetry: 5
+  read:
+    enabled: false
 
 redis:
   host: "127.0.0.1"
@@ -590,6 +626,7 @@ Common flags:
 * `--config-file` or `-C`: Path to YAML configuration file
 * `--db-host`: Database host
 * `--db-port`: Database port
+* `--db-read-enabled`: Open a second connection to a read replica (also `--db-read-host`, `--db-read-port`, `--db-read-user`, `--db-read-pass`, `--db-read-sslmode`, `--db-read-max-idle-conns`, `--db-read-max-open-conns`; environment variables `DB_READ_*`)
 * `--redis-host`: Redis host
 * `--listener` or `-l`: Service listener
 * `--port` or `-p`: Service port
