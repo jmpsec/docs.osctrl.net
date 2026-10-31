@@ -34,4 +34,4 @@ With `--metrics-enabled` and `osctrld.enabled`, `osctrl-tls` also exports gauges
 | `osctrld_rollbacks_total{environment,kind,stage}` | counter | Flags/extensions rollbacks reported by hosts | `sum` |
 | `osctrld_osquery_upgrade_rollbacks_total{environment}` | counter | osquery upgrades rolled back | `sum` |
 
-The gauges are read from the database, so every replica exports the same value; a database error exports nothing for that scrape. Pair an alert on them with an `absent()` rule if a database outage must not resolve it.
+The gauges are read from the database ([read replica](/configuration/#read-replica) when one is configured), so every replica exports the same value; a database error exports nothing for that scrape. Pair an alert on them with an `absent()` rule if a database outage must not resolve it.

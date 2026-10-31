@@ -16,6 +16,6 @@ Each component uses the backend differently but all of them have read/write oper
 
 ## Read replica
 
-The database can optionally have a read replica. When it is configured, [osctrl-api](/components/osctrl-api/) sends its read-heavy, staleness-tolerant queries (dashboard, node lists, audit log, posture and vulnerability views) to the replica and keeps everything else on the primary: writes, authentication, enrollment, and the query and carve lifecycle. Replication lag therefore only affects what the dashboard and lists display, never authorization or a read inside a write flow.
+The database can optionally have a read replica. When it is configured, [osctrl-api](/components/osctrl-api/) sends its read-heavy, staleness-tolerant queries (dashboard, node lists, audit log, posture and vulnerability views) and [osctrl-tls](/components/osctrl-tls/) its alert rule node scans and osctrld metrics to the replica and keeps everything else on the primary: writes, authentication, enrollment, and the query and carve lifecycle. Replication lag therefore only affects what the dashboard and lists display, never authorization or a read inside a write flow.
 
 Replicas are not supported with SQLite. See [Read replica](/configuration/#read-replica) for the settings.
