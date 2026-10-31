@@ -95,6 +95,7 @@ service:
   alertsEnabled: false                 # Enable the alerting subsystem (routes, tables, ingest)
   healthEnabled: false               # Enable component health/status reporting
   vulnEnabled: false                 # Enable vulnerability monitoring (restart required)
+  basePath: ""                       # osctrl-api only: public URL prefix, e.g. "/osctrl"
   eventsEnabled: false               # Enable SSE live-update invalidation hints
   eventsNamespace: ""                # Deployment-unique Redis namespace for live updates
   mfaRequired: false                 # osctrl-api only: require MFA for password logins
@@ -115,6 +116,7 @@ service:
 * `alertsEnabled` defaults to `false` (unlike the two above) and gates the [Alerts](/components/osctrl-frontend/#alerts) subsystem end to end: with it off, no alert tables are created, no routes are registered, and there's no ingest overhead. **Changing it requires a service restart** — both `osctrl-api` and `osctrl-tls` wire their alert routes/ingest hooks at boot.
 * `healthEnabled` turns on service heartbeats and `/api/v1/health/status`.
 * `vulnEnabled` turns on [vulnerability monitoring](/usage/vulnerabilities/). On `osctrl-tls` it stores software inventory; on `osctrl-api` it also registers the `/api/v1/vulnerabilities` routes and downloads OSV and CISA KEV data. When off, no tables are created and nothing is downloaded. **Requires a restart.** The feed settings (`vulnOSVURL`, `vulnKEVURL`, `vulnEcosystems`, `vulnSyncHours`, `vulnRetentionDays`, `vulnMaxDownloadMB`, `vulnNVDEnabled`, `vulnNVDURL`) are read by `osctrl-api` only; set the optional NVD API key through `VULN_NVD_API_KEY`, never in YAML.
+* `basePath` (osctrl-api only; flag `--base-path`, env `SERVICE_BASE_PATH`) is the public URL prefix the frontend and API are served under when osctrl shares a hostname behind a reverse proxy, for example `https://host/osctrl/`. Empty (default) serves at the root. See [Serving under a URL prefix](#serving-under-a-url-prefix).
 * `eventsEnabled` and `eventsNamespace` enable best-effort Server-Sent Events live-update hints through `/api/v1/events`. Set both on `osctrl-api` and `osctrl-tls`, and use a namespace unique to the deployment sharing Redis.
 
 **Authentication types** (`auth`):
@@ -462,6 +464,24 @@ The config file is read first and explicit flags or environment variables overri
 
 For the full tool list and client registration examples, see the [usage of osctrl-mcp](/usage/osctrl-mcp/).
 
+### Serving under a URL prefix
+
+The frontend build is prefix-agnostic, so one build serves any prefix. The prefix is set in two places, and **both must match**: the reverse proxy, and `basePath` on `osctrl-api`.
+
+1. **Proxy:** strip the prefix before forwarding, so API routes stay `/api/...`, and rewrite the `<base href>` of `index.html`. In the bundled `deploy/nginx/frontend.conf` uncomment the two `rewrite` lines and the `sub_filter` lines in `location /`, changing `osctrl` in all four places:
+
+   ```nginx
+   rewrite ^/osctrl$ /osctrl/ permanent;
+   rewrite ^/osctrl(/.*)$ $1 last;
+   # in location /
+   sub_filter '<base href="/" />' '<base href="/osctrl/" />';
+   sub_filter_once on;
+   ```
+
+2. **API:** set `service.basePath: "/osctrl"` (or `SERVICE_BASE_PATH`). osctrl-api uses it only for the paths it sends to the browser: the session, CSRF, ID-token and auth-state cookie paths, SSO callback and unauthorized redirects, and the `loginUrl`s in `/api/v1/auth/methods`.
+
+Only plain path segments (letters, digits, `-`, `_`, `.`, `~`) are accepted; an invalid value fails startup. If the two settings disagree, cookies are set for `/` and redirects go to the host root. With a prefix set, cookies are scoped to it, so browsers must use the prefixed URL; bearer-token clients are unaffected. The OIDC redirect URL and SAML ACS URL, and the callbacks registered at the IdP, must include the prefix, for example `https://host/osctrl/api/v1/auth/oidc/callback`; see [Auth providers](/usage/auth-providers/#serving-under-a-url-prefix).
+
 ### Service Configuration API and Restart
 
 Set `service.serviceConfigEnabled: true` (`osctrl-api` only) to expose `/api/v1/service-config` and show the **Service Config** section in [osctrl-frontend](/components/osctrl-frontend/). Once enabled, operators can review and edit any of the sections above from the UI, persisted to the `service_config` table in the backend database.
@@ -583,6 +603,7 @@ Common flags:
 * `--auth-providers-enabled`: Expose the auth providers API/frontend (default `true`)
 * `--alerts-enabled`: Enable the alerting subsystem (default `false`, requires a restart to change)
 * `--health-enabled`: Enable service health/status reporting
+* `--base-path`: Public URL prefix the frontend and API are served under (`osctrl-api` only)
 * `--vuln-enabled`: Enable [vulnerability monitoring](/usage/vulnerabilities/) (default `false`, requires a restart to change)
 * `--vuln-osv-url`, `--vuln-kev-url`, `--vuln-ecosystems`, `--vuln-sync-hours`, `--vuln-retention-days`, `--vuln-max-download-mb`, `--vuln-nvd-enabled`, `--vuln-nvd-url`, `--vuln-nvd-api-key`: Advisory feed settings (`osctrl-api` only)
 * `--mcp-enabled`, `--mcp-allow-writes`: Enable the hosted MCP endpoint on `osctrl-api`

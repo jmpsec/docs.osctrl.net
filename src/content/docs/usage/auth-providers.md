@@ -85,3 +85,7 @@ The **Auth Providers** page in [osctrl-frontend](/components/osctrl-frontend/#au
 ## Per-IdP setup and troubleshooting
 
 For step-by-step setup (Keycloak, Auth0, Okta, Microsoft Entra ID), common per-IdP gotchas (e.g. Auth0 defaulting to HS256 token signing, Okta/Entra emitting email-shaped username claims), logout/IdP-session-termination behavior, and a troubleshooting guide for failed logins, see the [full identity provider guide](https://github.com/jmpsec/osctrl/blob/master/docs/auth-providers.md) in the osctrl repository.
+
+## Serving under a URL prefix
+
+When osctrl is served at `https://<host>/osctrl/` instead of the root, set `SERVICE_BASE_PATH=/osctrl` on osctrl-api (see [Configuration](/configuration/#serving-under-a-url-prefix) for the proxy side). The OIDC redirect URL, the SAML ACS URL and the matching callback URLs registered at the IdP must include the prefix, for example `https://<host>/osctrl/api/v1/auth/oidc/callback` and `https://<host>/osctrl/api/v1/auth/saml/acs`. The proxy strips the prefix, so osctrl still routes them as `/api/v1/auth/...`.

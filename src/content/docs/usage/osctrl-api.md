@@ -38,6 +38,7 @@ GLOBAL OPTIONS:
    --geoip-db string                 Path to a MaxMind GeoLite2-Country .mmdb file. Empty (default) disables GeoIP enrichment. [$SERVICE_GEOIP_DB]
    --posture-enabled                 Enable security and compliance posture ingestion/API/frontend surfaces [$SERVICE_POSTURE_ENABLED]
    --alerts-enabled                  Enable alerting routes, matching and dispatch. Requires restart to change. [$SERVICE_ALERTS_ENABLED]
+   --base-path string                Public URL prefix the SPA and API are served under (e.g. /osctrl); the reverse proxy must strip it before forwarding. Empty serves at the root. [$SERVICE_BASE_PATH]
    --health-enabled                  Enable health/system-status reporting and /api/v1/health/status [$SERVICE_HEALTH_ENABLED]
    --vuln-enabled                    Enable vulnerability monitoring: store inventory, sync OSV/CISA KEV data and serve findings. Requires restart to change. [$SERVICE_VULN_ENABLED]
    --vuln-osv-url string             Base URL of the OSV data bucket, or an internal mirror (default: "https://osv-vulnerabilities.storage.googleapis.com") [$VULN_OSV_URL]
