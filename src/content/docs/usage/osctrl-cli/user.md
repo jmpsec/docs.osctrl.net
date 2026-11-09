@@ -67,6 +67,10 @@ OPTIONS:
    --environment string, -e string  Grant read access to this environment
    --email string, -E string        Email for the new user
    --fullname string, -n string     Full name for the new user
+   --user-admin                     Grant the user-management role
+   --env-manager                    Grant the environment-management role
+   --read-only-admin                Grant the read-only global role
+   --alert-admin                    Grant the alert-management role
    --help, -h                       show help
 
 GLOBAL OPTIONS:
@@ -109,6 +113,14 @@ OPTIONS:
    --service, -s                       Make this user a service account
    --non-service, -S                   Make this user a non-service account
    --environment string, --env string  Grant read access to this environment
+   --user-admin                        Grant the user-management role
+   --no-user-admin                     Revoke the user-management role
+   --env-manager                       Grant the environment-management role
+   --no-env-manager                    Revoke the environment-management role
+   --read-only-admin                   Grant the read-only global role
+   --no-read-only-admin                Revoke the read-only global role
+   --alert-admin                       Grant the alert-management role
+   --no-alert-admin                    Revoke the alert-management role
    --help, -h                          show help
 
 GLOBAL OPTIONS:
@@ -150,6 +162,9 @@ OPTIONS:
    --user, -U                       Grant user permissions
    --query, -q                      Grant query permissions
    --carve, -c                      Grant carve permissions
+   --query-tier string              Query tier: none, tags, standard or full (sets the query permission accordingly)
+   --carve-tier string              Carve tier: none, tags, standard or full (sets the carve permission accordingly)
+   --scope-tags string              Comma-separated tag names the tags tier is limited to (replaces existing; empty clears). In API mode, resolving tag names requires environment admin on that environment
    --help, -h                       show help
 
 GLOBAL OPTIONS:
@@ -189,6 +204,9 @@ OPTIONS:
    --user, -U                       Grant user permissions
    --query, -q                      Grant query permissions
    --carve, -c                      Grant carve permissions
+   --query-tier string              Query tier: none, tags, standard or full (sets the query permission accordingly)
+   --carve-tier string              Carve tier: none, tags, standard or full (sets the carve permission accordingly)
+   --scope-tags string              Comma-separated tag names the tags tier is limited to (replaces existing; empty clears). In API mode, resolving tag names requires environment admin on that environment
    --help, -h                       show help
 
 GLOBAL OPTIONS:
@@ -399,3 +417,6 @@ These apply in both `--db` and `--api` modes:
 * Permissions can't be granted on an empty environment; such rows grant nothing and are refused.
 * With `--db`, removing admin from a user, or deleting a super-admin, is refused if it would leave no super-admin (the same lockout policy as the API: self-demotion is refused with 403 and the last super-admin with 409).
 * `user delete` removes the user's permissions and MFA factors along with the account.
+* A user admin can't grant superuser, or edit, delete or re-token a superuser.
+* `--query-tier` / `--carve-tier` accept `none`, `tags`, `standard` or `full`; unknown tiers, unknown tags, tags from another environment and sensitive tags in `--scope-tags` are refused before anything is written, as is `--admin` combined with a `none` tier. See [Roles and permissions](/usage/rbac/).
+* `change-permissions` is additive and keeps a tag-scoped user tag-scoped unless `--query-tier` is given. `reset-permissions` is a full replace in both modes: an unset tier becomes `standard` when the flag is on and `none` when it is off, and tag grants are cleared unless `--scope-tags` is given.

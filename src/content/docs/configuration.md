@@ -47,6 +47,8 @@ The generated configuration includes:
 * Default values for each setting
 * Service-specific options relevant to each binary
 
+The file holds (or will hold) database, Redis and JWT secrets, so it is written with mode `0600` in a `0750` directory, and an overwritten file has its mode tightened too. [provision.sh](/usage/provision.sh/) installs configurations as `root:osctrl` with `0640` files in a `0750` directory, as the packages do.
+
 #### Verify Configuration
 
 To validate an existing configuration file before starting the service:
@@ -95,6 +97,7 @@ service:
   alertsEnabled: false                 # Enable the alerting subsystem (routes, tables, ingest)
   healthEnabled: false               # Enable component health/status reporting
   vulnEnabled: false                 # Enable vulnerability monitoring (restart required)
+  santaEnabled: false                # Enable the Santa sync server (restart required)
   basePath: ""                       # osctrl-api only: public URL prefix, e.g. "/osctrl"
   eventsEnabled: false               # Enable SSE live-update invalidation hints
   eventsNamespace: ""                # Deployment-unique Redis namespace for live updates
@@ -116,6 +119,7 @@ service:
 * `alertsEnabled` defaults to `false` (unlike the two above) and gates the [Alerts](/components/osctrl-frontend/#alerts) subsystem end to end: with it off, no alert tables are created, no routes are registered, and there's no ingest overhead. **Changing it requires a service restart** — both `osctrl-api` and `osctrl-tls` wire their alert routes/ingest hooks at boot.
 * `healthEnabled` turns on service heartbeats and `/api/v1/health/status`.
 * `vulnEnabled` turns on [vulnerability monitoring](/usage/vulnerabilities/). On `osctrl-tls` it stores software inventory; on `osctrl-api` it also registers the `/api/v1/vulnerabilities` routes and downloads OSV and CISA KEV data. When off, no tables are created and nothing is downloaded. **Requires a restart.** The feed settings (`vulnOSVURL`, `vulnKEVURL`, `vulnEcosystems`, `vulnSyncHours`, `vulnRetentionDays`, `vulnMaxDownloadMB`, `vulnNVDEnabled`, `vulnNVDURL`) are read by `osctrl-api` only; set the optional NVD API key through `VULN_NVD_API_KEY`, never in YAML.
+* `santaEnabled` turns on the [Santa sync server](/usage/santa/). Set it on both `osctrl-tls` (sync protocol) and `osctrl-api` (management API and Santa page). When off, no Santa tables are created and no routes are registered. **Requires a restart.**
 * `basePath` (osctrl-api only; flag `--base-path`, env `SERVICE_BASE_PATH`) is the public URL prefix the frontend and API are served under when osctrl shares a hostname behind a reverse proxy, for example `https://host/osctrl/`. Empty (default) serves at the root. See [Serving under a URL prefix](#serving-under-a-url-prefix).
 * `eventsEnabled` and `eventsNamespace` enable best-effort Server-Sent Events live-update hints through `/api/v1/events`. Set both on `osctrl-api` and `osctrl-tls`, and use a namespace unique to the deployment sharing Redis.
 
@@ -329,6 +333,10 @@ logger:
 * `logstash` - Send logs to Logstash
 * `elastic` - Send logs directly to Elasticsearch
 * `http` - Send logs to any HTTP/HTTPS endpoint. `format: json` sends the payload as-is, `ndjson` splits arrays into one object per line, and `raw` sends the bytes verbatim
+
+osctrl-tls stores each log batch before answering the node. The `db` and `s3` sinks report their errors, so a failed write answers 500 and osquery keeps the batch and resends it; a batch that partly succeeded can be stored twice on retry. The network sinks (Splunk, Kafka, Elastic, Graylog, Logstash, Kinesis, HTTP) do not report errors and stay best-effort.
+
+The `s3` sink writes status and result logs to `{env}/{logType}/{uuid}/{YYYY-MM-DD}/{ts}-{batch}.json`: a UTC day folder plus a random batch suffix, so batches written in the same millisecond do not overwrite each other. Readers still find keys written in the older layout without the day folder; tools outside osctrl that parse these keys need updating.
 
 ### Log Sinks
 
@@ -645,6 +653,7 @@ Common flags:
 * `--health-enabled`: Enable service health/status reporting
 * `--base-path`: Public URL prefix the frontend and API are served under (`osctrl-api` only)
 * `--vuln-enabled`: Enable [vulnerability monitoring](/usage/vulnerabilities/) (default `false`, requires a restart to change)
+* `--santa-enabled`: Enable the [Santa sync server](/usage/santa/) on `osctrl-tls` and `osctrl-api` (default `false`, requires a restart to change)
 * `--vuln-osv-url`, `--vuln-kev-url`, `--vuln-ecosystems`, `--vuln-sync-hours`, `--vuln-retention-days`, `--vuln-max-download-mb`, `--vuln-nvd-enabled`, `--vuln-nvd-url`, `--vuln-nvd-api-key`: Advisory feed settings (`osctrl-api` only)
 * `--mcp-enabled`, `--mcp-allow-writes`: Enable the hosted MCP endpoint on `osctrl-api`
 * `--mfa-required`, `--mfa-issuer`, `--mfa-rpid`, `--mfa-origins`: MFA settings (`osctrl-api` only)
@@ -667,6 +676,7 @@ export SERVICE_GEOIP_DB="/var/osctrl/GeoLite2-Country.mmdb"
 export SERVICE_POSTURE_ENABLED="true"
 export SERVICE_ALERTS_ENABLED="true"
 export SERVICE_HEALTH_ENABLED="true"
+export SERVICE_SANTA_ENABLED="true"
 export SERVICE_CONFIG_ENABLED="true"
 export MCP_ENABLED="true"
 ```

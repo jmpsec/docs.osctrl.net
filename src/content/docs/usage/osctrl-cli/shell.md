@@ -245,7 +245,7 @@ environment.
 
 | Command | Arguments | Description |
 |---|---|---|
-| `list` (or `ls`) | `[env]` | List tags (active env if omitted). |
+| `list` (or `ls`) | `[env]` | List tags (active env if omitted), with their Sensitive flag. |
 | `show` | `<name>` | Show tag detail. |
 | `add` | `<name> [color=.. icon=.. desc=.. type=.. custom=..]` | Add a tag to the active env. |
 | `edit` | `<name> [color=.. icon=.. desc=.. type=.. custom=..]` | Edit a tag in the active env. |
@@ -262,7 +262,7 @@ Commands for users and permissions.
 | `add` | `<username> password=<..> [email=.. fullname=.. admin=true service=false]` | Create a user. |
 | `edit` | `<username> <password\|email\|fullname\|admin\|service>=<value>` | Edit a single user field. |
 | `delete` (or `rm`) | `<username>` | Delete a user, with confirmation. |
-| `permissions` (or `perms`) | `<username>` | Show a user's per-environment permissions. |
+| `permissions` (or `perms`) | `<username>` | Show a user's per-environment permissions, with query/carve [tiers](/usage/rbac/). |
 
 ### audit
 

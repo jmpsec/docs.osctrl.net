@@ -30,6 +30,7 @@ COMMANDS:
    delete, d               Delete an existing TLS environment
    show, s                 Show a TLS environment
    list, l                 List all existing TLS environments
+   sensitive-paths         Manage sensitive carve paths of an environment
 
 OPTIONS:
    --help, -h  show help
@@ -1161,6 +1162,158 @@ GLOBAL OPTIONS:
    --silent, -s                       Silent mode: suppress output and skip confirmation prompts
    --version, -v                      Print version information
    --name string, -n string           Environment name to be updated
+```
+
+## Sensitive carve paths
+
+Path prefixes that only users with the **full** carve tier can carve. See [RBAC](/usage/rbac/#sensitive-carve-paths) for how paths are matched. Works in both API and `--db` mode; `--db` mode applies the same normalization and validation as the server but does not cancel pending carves.
+
+```properties
+$ ./osctrl-cli environment sensitive-paths -h
+NAME:
+   osctrl-cli environment sensitive-paths - Manage sensitive carve paths of an environment
+
+USAGE:
+   osctrl-cli environment sensitive-paths [command [command options]]
+
+COMMANDS:
+   list, l  List the sensitive carve paths
+   add      Add a sensitive carve path
+   remove   Remove a sensitive carve path by ID
+
+OPTIONS:
+   --help, -h  show help
+
+GLOBAL OPTIONS:
+   --db, -d                           Connect to local osctrl DB using YAML config file (required by db-only commands: settings add, settings delete). DB-mode environment edits do not invalidate the shared Redis environment cache: osctrl-api/osctrl-tls may serve the old environment for up to 5 minutes [$DB_CONFIG]
+   --api, -a                          Connect to remote osctrl using JSON config file (the default; every command except settings add/delete also works with --db; ignored when --db is set) [$API_CONFIG]
+   --api-file FILE, -A FILE           Load API JSON configuration from FILE (default: "osctrl-api.json") [$API_CONFIG_FILE]
+   --api-url string, -U string        The URL for osctrl API to be used [$API_URL]
+   --api-token string, -T string      Token to authenticate with the osctrl API [$API_TOKEN]
+   --db-file FILE, -D FILE            Load DB YAML configuration from FILE [$DB_CONFIG_FILE]
+   --db-host string                   Backend host to be connected to (default: "127.0.0.1") [$DB_HOST]
+   --db-port int                      Backend port to be connected to (default: 5432) [$DB_PORT]
+   --db-name string                   Database name to be used in the backend (default: "osctrl") [$DB_NAME]
+   --db-user string                   Username to be used for the backend (default: "postgres") [$DB_USER]
+   --db-pass string                   Password to be used for the backend (default: "postgres") [$DB_PASS]
+   --db-max-idle-conns int            Maximum number of connections in the idle connection pool (default: 20) [$DB_MAX_IDLE_CONNS]
+   --db-max-open-conns int            Maximum number of open connections to the database (default: 100) [$DB_MAX_OPEN_CONNS]
+   --db-conn-max-lifetime int         Maximum amount of time a connection may be reused (default: 30) [$DB_CONN_MAX_LIFETIME]
+   --insecure, -i                     Allow insecure server connections when using SSL
+   --verbose, -V                      Increase output verbosity for debugging
+   --output-format string, -o string  Format to be used for data output (default: "pretty") [$OUTPUT_FORMAT]
+   --silent, -s                       Silent mode: suppress output and skip confirmation prompts
+   --version, -v                      Print version information
+```
+
+### List sensitive paths
+
+```properties
+$ ./osctrl-cli environment sensitive-paths list -h
+NAME:
+   osctrl-cli environment sensitive-paths list - List the sensitive carve paths
+
+USAGE:
+   osctrl-cli environment sensitive-paths list [options]
+
+OPTIONS:
+   --environment string, -e string  Environment name or UUID
+   --help, -h                       show help
+
+GLOBAL OPTIONS:
+   --db, -d                           Connect to local osctrl DB using YAML config file (required by db-only commands: settings add, settings delete). DB-mode environment edits do not invalidate the shared Redis environment cache: osctrl-api/osctrl-tls may serve the old environment for up to 5 minutes [$DB_CONFIG]
+   --api, -a                          Connect to remote osctrl using JSON config file (the default; every command except settings add/delete also works with --db; ignored when --db is set) [$API_CONFIG]
+   --api-file FILE, -A FILE           Load API JSON configuration from FILE (default: "osctrl-api.json") [$API_CONFIG_FILE]
+   --api-url string, -U string        The URL for osctrl API to be used [$API_URL]
+   --api-token string, -T string      Token to authenticate with the osctrl API [$API_TOKEN]
+   --db-file FILE, -D FILE            Load DB YAML configuration from FILE [$DB_CONFIG_FILE]
+   --db-host string                   Backend host to be connected to (default: "127.0.0.1") [$DB_HOST]
+   --db-port int                      Backend port to be connected to (default: 5432) [$DB_PORT]
+   --db-name string                   Database name to be used in the backend (default: "osctrl") [$DB_NAME]
+   --db-user string                   Username to be used for the backend (default: "postgres") [$DB_USER]
+   --db-pass string                   Password to be used for the backend (default: "postgres") [$DB_PASS]
+   --db-max-idle-conns int            Maximum number of connections in the idle connection pool (default: 20) [$DB_MAX_IDLE_CONNS]
+   --db-max-open-conns int            Maximum number of open connections to the database (default: 100) [$DB_MAX_OPEN_CONNS]
+   --db-conn-max-lifetime int         Maximum amount of time a connection may be reused (default: 30) [$DB_CONN_MAX_LIFETIME]
+   --insecure, -i                     Allow insecure server connections when using SSL
+   --verbose, -V                      Increase output verbosity for debugging
+   --output-format string, -o string  Format to be used for data output (default: "pretty") [$OUTPUT_FORMAT]
+   --silent, -s                       Silent mode: suppress output and skip confirmation prompts
+   --version, -v                      Print version information
+```
+
+### Add sensitive path
+
+```properties
+$ ./osctrl-cli environment sensitive-paths add -h
+NAME:
+   osctrl-cli environment sensitive-paths add - Add a sensitive carve path
+
+USAGE:
+   osctrl-cli environment sensitive-paths add [options]
+
+OPTIONS:
+   --environment string, -e string  Environment name or UUID
+   --path string, -p string         Absolute path prefix to protect
+   --help, -h                       show help
+
+GLOBAL OPTIONS:
+   --db, -d                           Connect to local osctrl DB using YAML config file (required by db-only commands: settings add, settings delete). DB-mode environment edits do not invalidate the shared Redis environment cache: osctrl-api/osctrl-tls may serve the old environment for up to 5 minutes [$DB_CONFIG]
+   --api, -a                          Connect to remote osctrl using JSON config file (the default; every command except settings add/delete also works with --db; ignored when --db is set) [$API_CONFIG]
+   --api-file FILE, -A FILE           Load API JSON configuration from FILE (default: "osctrl-api.json") [$API_CONFIG_FILE]
+   --api-url string, -U string        The URL for osctrl API to be used [$API_URL]
+   --api-token string, -T string      Token to authenticate with the osctrl API [$API_TOKEN]
+   --db-file FILE, -D FILE            Load DB YAML configuration from FILE [$DB_CONFIG_FILE]
+   --db-host string                   Backend host to be connected to (default: "127.0.0.1") [$DB_HOST]
+   --db-port int                      Backend port to be connected to (default: 5432) [$DB_PORT]
+   --db-name string                   Database name to be used in the backend (default: "osctrl") [$DB_NAME]
+   --db-user string                   Username to be used for the backend (default: "postgres") [$DB_USER]
+   --db-pass string                   Password to be used for the backend (default: "postgres") [$DB_PASS]
+   --db-max-idle-conns int            Maximum number of connections in the idle connection pool (default: 20) [$DB_MAX_IDLE_CONNS]
+   --db-max-open-conns int            Maximum number of open connections to the database (default: 100) [$DB_MAX_OPEN_CONNS]
+   --db-conn-max-lifetime int         Maximum amount of time a connection may be reused (default: 30) [$DB_CONN_MAX_LIFETIME]
+   --insecure, -i                     Allow insecure server connections when using SSL
+   --verbose, -V                      Increase output verbosity for debugging
+   --output-format string, -o string  Format to be used for data output (default: "pretty") [$OUTPUT_FORMAT]
+   --silent, -s                       Silent mode: suppress output and skip confirmation prompts
+   --version, -v                      Print version information
+```
+
+### Remove sensitive path
+
+```properties
+$ ./osctrl-cli environment sensitive-paths remove -h
+NAME:
+   osctrl-cli environment sensitive-paths remove - Remove a sensitive carve path by ID
+
+USAGE:
+   osctrl-cli environment sensitive-paths remove [options]
+
+OPTIONS:
+   --environment string, -e string  Environment name or UUID
+   --id uint                        Sensitive path ID (default: 0)
+   --help, -h                       show help
+
+GLOBAL OPTIONS:
+   --db, -d                           Connect to local osctrl DB using YAML config file (required by db-only commands: settings add, settings delete). DB-mode environment edits do not invalidate the shared Redis environment cache: osctrl-api/osctrl-tls may serve the old environment for up to 5 minutes [$DB_CONFIG]
+   --api, -a                          Connect to remote osctrl using JSON config file (the default; every command except settings add/delete also works with --db; ignored when --db is set) [$API_CONFIG]
+   --api-file FILE, -A FILE           Load API JSON configuration from FILE (default: "osctrl-api.json") [$API_CONFIG_FILE]
+   --api-url string, -U string        The URL for osctrl API to be used [$API_URL]
+   --api-token string, -T string      Token to authenticate with the osctrl API [$API_TOKEN]
+   --db-file FILE, -D FILE            Load DB YAML configuration from FILE [$DB_CONFIG_FILE]
+   --db-host string                   Backend host to be connected to (default: "127.0.0.1") [$DB_HOST]
+   --db-port int                      Backend port to be connected to (default: 5432) [$DB_PORT]
+   --db-name string                   Database name to be used in the backend (default: "osctrl") [$DB_NAME]
+   --db-user string                   Username to be used for the backend (default: "postgres") [$DB_USER]
+   --db-pass string                   Password to be used for the backend (default: "postgres") [$DB_PASS]
+   --db-max-idle-conns int            Maximum number of connections in the idle connection pool (default: 20) [$DB_MAX_IDLE_CONNS]
+   --db-max-open-conns int            Maximum number of open connections to the database (default: 100) [$DB_MAX_OPEN_CONNS]
+   --db-conn-max-lifetime int         Maximum amount of time a connection may be reused (default: 30) [$DB_CONN_MAX_LIFETIME]
+   --insecure, -i                     Allow insecure server connections when using SSL
+   --verbose, -V                      Increase output verbosity for debugging
+   --output-format string, -o string  Format to be used for data output (default: "pretty") [$OUTPUT_FORMAT]
+   --silent, -s                       Silent mode: suppress output and skip confirmation prompts
+   --version, -v                      Print version information
 ```
 
 ## Delete environment

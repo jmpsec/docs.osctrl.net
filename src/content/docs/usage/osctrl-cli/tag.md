@@ -64,6 +64,7 @@ OPTIONS:
    --description string, -d string                  Tag description to be used
    --tag-type string, -t string, --type string      Tag type to be used. It can be 'env', 'uuid', 'platform', 'localname', 'tag' and 'custom' (default: "custom")
    --tag-custom string, -C string, --custom string  Tag custom value to be used. It is only used if tag-type is set to 'custom'
+   --sensitive                                      Mark the tag as sensitive: it is removed from every scope grant and cannot be granted (env admins only)
    --help, -h                                       show help
 
 GLOBAL OPTIONS:
@@ -86,7 +87,11 @@ GLOBAL OPTIONS:
    --version, -v                      Print version information
 ```
 
+`--sensitive` marks the tag [sensitive](/usage/rbac/#sensitive-nodes): nodes carrying it are reachable only at the full query/carve tier, and the tag is removed from every scope grant. `tag list` and `tag show` include a Sensitive column.
+
 ## Edit tag
+
+`tag edit` only changes the fields passed on the command line; type, custom value, color, icon, description and the sensitive flag keep their stored values otherwise.
 
 ```properties
 $ ./osctrl-cli tag edit -h
@@ -104,6 +109,7 @@ OPTIONS:
    --description string, -d string                  Tag description to be used
    --tag-type string, -t string, --type string      Tag type to be used. It can be 'env', 'uuid', 'platform', 'localname', 'tag' and 'custom'
    --tag-custom string, -C string, --custom string  Tag custom value to be used. It is only used if tag-type is set to 'custom'
+   --sensitive                                      Mark the tag as sensitive: it is removed from every scope grant and cannot be granted (env admins only)
    --help, -h                                       show help
 
 GLOBAL OPTIONS:

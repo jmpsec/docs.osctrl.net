@@ -70,3 +70,13 @@ The idea behind making osctrl-tls its own component is all about scalability. In
 Running multiple instances of osctrl-tls will help to scale the service and be reliable for a larger number of nodes.
 
 For example, using the intervals of the flags above, where logs, configuration and queries run every 600, 300 and 60 seconds. Presuming that you have 1000 machines and you want to enroll them all in **osctrl**.
+
+## Node keys and request handling
+
+* **Node keys** are 32 random bytes (64 hex characters), with nothing derived from the host or the enrollment time. Nodes enrolled before this change keep their old key until they re-enroll; re-enroll the fleet if those keys must be rotated.
+* **Shared node key cache.** Node keys are cached in Redis and shared by osctrl-api and every osctrl-tls replica, so deleting or re-enrolling a node revokes its old key everywhere at once. Changes made with `osctrl-cli --db` don't touch Redis, so an old key can stay valid for up to the 10-minute cache lifetime.
+* **Re-enrollment is scoped to the environment.** Enrolling with one environment's secret only finds and updates the node row in that environment, never a node with the same UUID in another one.
+* **Unknown environments** get exactly the response a known environment gives to bad credentials (for example `200 {"node_invalid": true}` on config, log and query endpoints, 403 on enroll), so responses don't reveal which environment UUIDs exist. They are logged at debug level and counted in `osctrl_tls_unknown_environment_total`.
+* **Ingest budgets.** Log batches are stored before the node gets its answer, and batches in flight share a 256 MiB budget; when it is full the node gets 503 and retries (`osctrl_tls_log_backpressure_total`). Distributed query results have their own 256 MiB budget, so large results can't starve log ingestion.
+* **Query results** are only accepted from a node that has a pending assignment for that query, and a retried response changes nothing. Carve init and block uploads are scoped to the requesting node and its environment.
+* With `santaEnabled`, osctrl-tls also serves the [Santa sync protocol](/usage/santa/) at `POST /{env}/santa/sync/{stage}/{machineid}`.

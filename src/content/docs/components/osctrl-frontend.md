@@ -76,6 +76,8 @@ Besides `pwd`, `cd <path>`, `ls [path]`, `get <path>` (carve a file), `ps`, `sql
 
 Type `.tables`/`.exit` inside `osquery` mode to list tables or return to the console.
 
+The console prints the command list once warm-up finishes. **Tab** completes the command name (press it again to list several matches; in `osquery` mode only dot-commands are offered), and **↑**/**↓** step through earlier commands, starting with the session history. Tab on an empty line still moves focus.
+
 ## File explorer
 
 Each node detail page also offers a **File Explorer** tab: a tree view of that node's filesystem, browsed live over osquery. It's gated by the `osquery.fileExplorer` [configuration](/configuration/#osquery-configuration) key on `osctrl-api` (and `query: true`) — disabled by default.
@@ -120,3 +122,11 @@ An operator can run multiple sinks at once, enable/disable each independently, s
 The **Auth Providers** page — gated by `service.authProvidersEnabled` (default `true`) — lets an operator review, test, and edit the SAML and OIDC settings documented in [Auth providers](/usage/auth-providers/) from the UI instead of only through YAML, including fetching an IdP's SAML metadata by URL and reverting a provider back to its YAML-seeded values.
 
 At v0.5.8 this is a management layer over the **existing single-SAML/single-OIDC login model**, not concurrent multi-provider login: the actual `/api/v1/auth/{oidc,saml}/...` login routes are still built once at startup from the classic `saml.enabled`/`oidc.enabled` YAML flags, the same as before this page existed. Treat it as a live editor and test bench for that one active SAML config and one active OIDC config, not as a way to run several independent SAML/OIDC providers side by side yet.
+
+## Roles and access
+
+Navigation, pages and controls follow the signed-in user's [global roles and per-environment tiers](/usage/rbac/), read from `/api/v1/users/me`; the server stays authoritative. The **Users** page edits roles, query/carve tiers and tag grants, the **Tags** page marks tags sensitive, and the environment config page has a **Sensitive paths** tab.
+
+## Santa
+
+With `santaEnabled`, environment admins get a **Santa** page per environment with Rules, Events, Machines and Settings tabs. See [Santa sync server](/usage/santa/).

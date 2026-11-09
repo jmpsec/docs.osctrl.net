@@ -70,6 +70,13 @@ A federated login whose resolved username matches an existing **local password a
 
 Enable it only when you trust the IdP to be authoritative over usernames. Linking never grants extra privileges — a non-admin local account stays non-admin — and once the account is stamped on first federated login, the flag can be turned back off; already-linked accounts keep working.
 
+## Identity binding
+
+Each federated user is bound to the IdP identity that first signed in as them, stored as `<issuer>#<subject>` (one binding for OIDC, one for SAML). On later logins osctrl looks the user up by that binding first, so an IdP-side username rename keeps the account. A login whose username matches a user bound to a **different** identity, including the same subject from another issuer, is refused, so a new identity that gains an existing username can't take over that account.
+
+* Users created on first login are bound immediately. Existing federated users are bound on their next login, which writes an audit entry; until then, the username alone still matches.
+* Changing the IdP issuer rejects bound users. There is no reset command yet: clear the `oidc_subject` or `saml_subject` column for the affected users and they bind again on their next login.
+
 ## Multi-factor authentication
 
 MFA (TOTP, WebAuthn passkeys, and recovery codes) applies only to local password logins — federated logins are the identity provider's responsibility and are exempt. See [Configuration](/configuration/#service-configuration) for the `mfaRequired`/`mfaIssuer`/`mfaRPID`/`mfaOrigins` settings.

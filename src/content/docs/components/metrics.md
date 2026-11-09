@@ -35,3 +35,13 @@ With `--metrics-enabled` and `osctrld.enabled`, `osctrl-tls` also exports gauges
 | `osctrld_osquery_upgrade_rollbacks_total{environment}` | counter | osquery upgrades rolled back | `sum` |
 
 The gauges are read from the database ([read replica](/configuration/#read-replica) when one is configured), so every replica exports the same value; a database error exports nothing for that scrape. Pair an alert on them with an `absent()` rule if a database outage must not resolve it.
+
+## osctrl-tls protection metrics
+
+| Metric | Type | Meaning |
+| --- | --- | --- |
+| `osctrl_tls_log_backpressure_total` | counter | Log requests answered 503 because the in-flight log budget was full |
+| `osctrl_tls_unknown_environment_total{handler}` | counter | Requests for an environment UUID that doesn't exist; the label is the handler name, never the UUID |
+| `santa_auth_audit_dropped_total` | counter | Failed [Santa](/usage/santa/) authentications not written to the audit log because of the per-environment cap |
+
+Request duration metrics are labelled by the registered route rather than the raw URL path, so unauthenticated requests can't create new label sets.
