@@ -73,7 +73,7 @@ For production deployments, prefer the native Ubuntu path with `provision.sh` or
 
 ## Staging (published release)
 
-`docker-compose-staging.yml` runs the four published Docker Hub images (`osctrl-tls`, `osctrl-api`, `osctrl-cli`, `osctrl-frontend`) instead of building from source. Use a release that publishes all four, such as `0.6.2`.
+`docker-compose-staging.yml` runs the four published Docker Hub images (`osctrl-tls`, `osctrl-api`, `osctrl-cli`, `osctrl-frontend`) instead of building from source. Use a release that publishes all four, such as `0.7.0`.
 
 ```bash
 cp .env.staging.example .env.staging

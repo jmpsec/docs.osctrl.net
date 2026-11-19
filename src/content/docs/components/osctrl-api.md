@@ -17,7 +17,8 @@ You can find the updated [API documentation](/api/) for **osctrl**, generated us
 It also exposes two newer operator-facing surfaces when enabled:
 
 * `/api/v1/events` streams best-effort Server-Sent Events hints for live frontend updates. The stream does not replace REST snapshots; clients still refetch the affected data after `resource.changed`.
-* `/api/v1/santa/{env}/...` manages the [Santa sync server](/usage/santa/) (config, token, rules, machines, events) when `santaEnabled` is true.
+* `/api/v1/santa/{env}/...` manages the [Santa sync server](/usage/santa/) (config, token, rules, mode overrides, machines, events, binaries, reports, approval requests and votes) when `santaEnabled` is true, and `/api/v1/changes/{env}` holds Santa changes that wait for a [second admin](/usage/santa/#second-admin-approval).
+* `/api/v1/scim/v2` serves [SCIM 2.0 provisioning](/usage/auth-providers/#scim-provisioning) of SSO accounts once a superuser creates a SCIM token.
 * `/api/v1/vulnerabilities` serves [vulnerability monitoring](/usage/vulnerabilities/) findings when `vulnEnabled` is true.
 * Optionally reads dashboard, node list, audit log, posture and vulnerability data from a [database read replica](/configuration/#read-replica).
 * `/api/v1/mcp` hosts the authenticated MCP endpoint when `mcp.enabled` is true, using the caller's normal token, permissions and audit trail.

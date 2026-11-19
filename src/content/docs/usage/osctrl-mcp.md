@@ -32,7 +32,7 @@ USAGE:
    osctrl-mcp [global options]
 
 VERSION:
-   0.6.0
+   0.7.0
 
 GLOBAL OPTIONS:
    --api-url string                                                Base URL of osctrl-api, e.g. https://osctrl.example.com [$OSCTRL_API_URL]
@@ -42,7 +42,7 @@ GLOBAL OPTIONS:
    --allow-writes                                                  Expose the mutating tools (run_query, expire_query, complete_query, tag_node). Off by default; the token's own permissions still apply [$OSCTRL_MCP_ALLOW_WRITES]
    --log-level string                                              Log level: debug, info, warn, error (default: "info") [$OSCTRL_LOG_LEVEL]
    --help, -h                                                      show help
-   --version, -v                                                   print the version
+   --version, -v                                                   Print version information
 ```
 
 ## Pointing It at osctrl-api
@@ -112,6 +112,12 @@ The server is read-only by default. It reports itself to the client as `osctrl`.
 | `list_queries` | Distributed queries in an environment, newest first, with how many nodes have answered |
 | `list_saved_queries` | The saved, reusable query templates — not queries that have run |
 | `get_query_results` | Rows returned so far for a distributed query |
+| `list_santa_rules` | Santa rules of an environment, filtered by rule type, policy or identifier substring |
+| `list_santa_machines` | Macs that sync Santa with osctrl: version, client mode, last sync, and whether their rules are up to date |
+| `list_santa_events` | Santa execution events, newest first, filtered by machine, decision (such as `BLOCK`) or file hash |
+| `get_santa_node_rules` | The rules and client mode that apply to one Mac after scope resolution |
+
+The four Santa tools need admin permission on the environment, like the [Santa](/usage/santa/) page. They are always listed; where Santa is not enabled they return the API's "santa not enabled" error.
 
 Distributed queries are asynchronous. Results accumulate as nodes check in over seconds to minutes, so a small or empty result set means *not yet*, not *no matches*.
 
@@ -125,8 +131,12 @@ Passing `--allow-writes` additionally registers the mutating tools. They are opt
 | `expire_query` | Stop a query from being handed to any more nodes. Results already collected stay readable |
 | `complete_query` | Mark a query complete, so osctrl stops waiting on nodes that have not answered |
 | `tag_node` | Apply an existing tag to a node. Tags drive query targeting, so this changes which queries a node receives in future. Requires admin permission |
+| `create_santa_rule` | Create one Santa allow or block rule. Requires admin permission |
+| `delete_santa_rule` | Delete one Santa rule by id. Requires admin permission |
 
 `run_query` does real work on every targeted endpoint, so target as narrowly as the task allows and prefer reading an existing query's results over re-running it.
+
+`create_santa_rule` is narrower than the REST endpoint, because Santa rules decide what software runs on Macs: a scope is required (an `env` rule reaches every Mac in the environment, so it is never defaulted), CEL rules and custom URLs are not offered, and there is no update or bulk import, so each change is one audit line. With writes on, the server tells the model that a blocked binary's path, name or signer is never a reason to allow it.
 
 ## Fleet Data Is Untrusted
 

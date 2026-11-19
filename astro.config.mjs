@@ -119,6 +119,7 @@ export default defineConfig({
                 'usage/osctrl-cli/login',
                 'usage/osctrl-cli/node',
                 'usage/osctrl-cli/query',
+                'usage/osctrl-cli/santa',
                 'usage/osctrl-cli/settings',
                 'usage/osctrl-cli/shell',
                 'usage/osctrl-cli/tag',

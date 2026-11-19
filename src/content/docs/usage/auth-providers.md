@@ -1,6 +1,6 @@
 ---
 title: "Auth providers"
-description: "Configuring SAML and OIDC identity providers for osctrl-api, and the new Auth Providers management UI."
+description: "Configuring SAML and OIDC identity providers for osctrl-api, SCIM provisioning, and the Auth Providers management UI."
 sidebar:
   order: 3
 ---
@@ -76,6 +76,27 @@ Each federated user is bound to the IdP identity that first signed in as them, s
 
 * Users created on first login are bound immediately. Existing federated users are bound on their next login, which writes an audit entry; until then, the username alone still matches.
 * Changing the IdP issuer rejects bound users. There is no reset command yet: clear the `oidc_subject` or `saml_subject` column for the affected users and they bind again on their next login.
+
+## SCIM provisioning
+
+osctrl-api serves a SCIM 2.0 endpoint (Users and Groups) so the IdP manages SSO accounts instead of waiting for each person's first login. It is off until a superuser creates a token in **Users → SCIM…**.
+
+**Setup.** Base URL `https://<osctrl>/api/v1/scim/v2` (include the [URL prefix](#serving-under-a-url-prefix) if any), authentication "HTTP header / bearer token" with the token from osctrl. The token is shown once and stored hashed; rotating replaces it, and removing it turns SCIM off. Push users before groups.
+
+| IdP action | osctrl account |
+|---|---|
+| Create user | Creates an account named from `userName` by the [username rules](#username-rules), with no password, no roles and no environment permissions. The badge shows **SCIM** until the person's first SSO login binds it, then OIDC or SAML. An existing federated account with that name is adopted. |
+| Update user | Copies the primary email and `displayName`. A `userName` change does **not** rename the account. |
+| `active: false` | Disables the account: password and SSO login are refused, and its API token and sessions end at once. `active: true` restores it with its roles and permissions. |
+| Delete user | Deletes the account, its permissions and its second factors. |
+
+* **Access is still granted in osctrl.** SCIM decides who has an account, not what it can do: roles and environment permissions are set on the Users page.
+* **Local and service accounts are never taken over.** A SCIM user whose name matches one fails with `409`, independent of `linkLocalAccounts`.
+* **The last active superuser** is never disabled or deleted through SCIM (`409`).
+* **Groups** are stored and shown under **Users → user → Groups…**. With Santa enabled they also drive [IdP group tags](/usage/santa/#idp-group-tags), and SSO logins stop changing the groups of SCIM users.
+* **Supported requests.** Filters are `attribute eq "value"` only, which is what Okta and Entra ID send; PATCH supports their forms. Attributes osctrl does not keep are accepted and dropped.
+* **Audit.** Token changes are logged under the superuser, every SCIM change under the user `scim`.
+* **Trust.** The token can create, disable and delete accounts and change everyone's groups. Treat it like an IdP admin credential.
 
 ## Multi-factor authentication
 

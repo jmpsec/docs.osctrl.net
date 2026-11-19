@@ -101,6 +101,8 @@ A rule watches one **source**:
 | `query_log` | On-demand distributed query results |
 | `node_inactive` | A node crosses the environment's inactive-hours threshold (periodic sweep, not log-driven) |
 | `node_recovered` | A previously-inactive node is seen again (only evaluated when such a rule exists) |
+| `vuln_finding` | A node gains an open confirmed [vulnerability finding](/usage/vulnerabilities/) |
+| `santa_event` | A [Santa](/usage/santa/#events-in-log-sinks-and-alert-rules) execution event matching the rule's pattern |
 
 For log-based sources, `matchType` is `substring` (case-insensitive) or `regex`, and an optional `matchField` narrows the match to one field instead of every column in the row. A rule can be scoped globally, to one environment, or pinned to a single node — the node detail page shows which rules currently cover it and why. Repeat matches are deduplicated by a per-rule cooldown (15 minutes by default).
 
@@ -129,4 +131,4 @@ Navigation, pages and controls follow the signed-in user's [global roles and per
 
 ## Santa
 
-With `santaEnabled`, environment admins get a **Santa** page per environment with Rules, Events, Machines and Settings tabs. See [Santa sync server](/usage/santa/).
+With `santaEnabled`, environment admins get a **Santa** page per environment with Rules, Events, Machines, Requests, Reports, File access, Changes and Settings tabs, plus a binary detail view for each file hash. Users whose software was blocked get a standalone request page outside the application shell, and approvers get a decision page for the links in request notifications. See [Santa sync server](/usage/santa/).

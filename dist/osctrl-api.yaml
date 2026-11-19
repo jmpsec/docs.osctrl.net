@@ -9,7 +9,7 @@ info:
     url: https://github.com/jmpsec/osctrl/blob/master/LICENSE
   termsOfService: https://github.com/jmpsec/osctrl
   title: osctrl API
-  version: 0.6.2
+  version: 0.7.0
 paths:
   /:
     get:
@@ -1915,6 +1915,116 @@ paths:
       summary: List carve samples
       tags:
         - carves
+  "/api/v1/changes/{env}":
+    get:
+      description: Newest first, at most 200. Requires environment admin.
+      parameters:
+        - description: Environment name or UUID
+          in: path
+          name: env
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/handlers.ChangeView"
+                type: array
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "503":
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+      security:
+        - ApiKeyAuth: []
+      summary: List changes held for a second admin
+      tags:
+        - changes
+  "/api/v1/changes/{env}/{id}/decision":
+    post:
+      description: Requires environment admin. Only someone other than the requester
+        can approve; the requester can deny to withdraw it. An approved change
+        is applied by the requester sending the same request again within 24
+        hours of the request.
+      parameters:
+        - description: Environment name or UUID
+          in: path
+          name: env
+          required: true
+          schema:
+            type: string
+        - description: Change ID
+          in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/handlers.ChangeDecision"
+        description: Decision
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/changes.Change"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "503":
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+      security:
+        - ApiKeyAuth: []
+      summary: Approve or deny a change held for a second admin
+      tags:
+        - changes
   /api/v1/checks-auth:
     get:
       description: Returns API availability for an authenticated user.
@@ -8568,6 +8678,118 @@ paths:
       summary: List query samples
       tags:
         - queries
+  "/api/v1/santa/{env}/binaries/{sha256}":
+    get:
+      description: Requires environment admin. Identity fields (names, signing chain,
+        bundle) come from the file's newest event and are written by Santa
+        clients. First and last seen, the event counts and the machine count
+        only cover the events osctrl still keeps (30 days). Rules lists every
+        rule of the environment naming the file, its team ID, signing ID, CDHash
+        or leaf certificate. 404 when the environment has no event for the hash.
+      parameters:
+        - description: Environment name or UUID
+          in: path
+          name: env
+          required: true
+          schema:
+            type: string
+        - description: SHA-256 of the file
+          in: path
+          name: sha256
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/santa.Binary"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "503":
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+      security:
+        - ApiKeyAuth: []
+      summary: Get what the stored events say about one binary
+      tags:
+        - santa
+  "/api/v1/santa/{env}/binaries/{sha256}/risk":
+    post:
+      description: Requires environment admin. Runs every configured risk check whose
+        cached verdict is missing or expired (VirusTotal, custom webhook) and
+        returns the result. Only the hash is sent. 404 when no risk check is
+        configured.
+      parameters:
+        - description: Environment name or UUID
+          in: path
+          name: env
+          required: true
+          schema:
+            type: string
+        - description: SHA-256 of the file
+          in: path
+          name: sha256
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/santa.Risk"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "503":
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+      security:
+        - ApiKeyAuth: []
+      summary: Run the Santa risk checks for a binary
+      tags:
+        - santa
   "/api/v1/santa/{env}/config":
     get:
       parameters:
@@ -8629,6 +8851,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/handlers.SantaConfigResponse"
+        "202":
+          description: Held for a second admin (require_second_admin)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.PendingChangeResponse"
         "400":
           description: Bad Request
           content:
@@ -8677,6 +8905,21 @@ paths:
           name: page_size
           schema:
             type: integer
+        - description: Only events of this machine (node UUID)
+          in: query
+          name: machine_id
+          schema:
+            type: string
+        - description: Decision name or prefix, for example BLOCK
+          in: query
+          name: decision
+          schema:
+            type: string
+        - description: Only events of this file hash
+          in: query
+          name: sha256
+          schema:
+            type: string
       responses:
         "200":
           description: OK
@@ -8684,6 +8927,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/handlers.SantaEventsResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
         "403":
           description: Forbidden
           content:
@@ -8705,6 +8954,133 @@ paths:
       security:
         - ApiKeyAuth: []
       summary: List Santa execution events
+      tags:
+        - santa
+  "/api/v1/santa/{env}/events/{id}/carve":
+    post:
+      description: "Requires environment admin. Starts an osquery file carve of the
+        event's file on the machine that reported it, through the carves
+        endpoint: the caller also needs carve access, sensitive paths stay
+        refused, and the carve is stored and audited like any other. The carve
+        name is recorded on the event. 409 when the event has no path or its
+        machine is not an osquery node of the environment. The path is written
+        by the Santa client."
+      parameters:
+        - description: Environment name or UUID
+          in: path
+          name: env
+          required: true
+          schema:
+            type: string
+        - description: Event ID
+          in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiQueriesResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "503":
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+      security:
+        - ApiKeyAuth: []
+      summary: Retrieve the file of a Santa event from its machine
+      tags:
+        - santa
+  "/api/v1/santa/{env}/file-access-events":
+    get:
+      description: Requires environment admin. Violations of file access rules
+        deployed to the clients through MDM, newest first, kept 30 days. Every
+        field but the IDs is written by Santa clients.
+      parameters:
+        - description: Environment name or UUID
+          in: path
+          name: env
+          required: true
+          schema:
+            type: string
+        - description: Page (1-based)
+          in: query
+          name: page
+          schema:
+            type: integer
+        - description: Page size
+          in: query
+          name: page_size
+          schema:
+            type: integer
+        - description: Only events of this machine (node UUID)
+          in: query
+          name: machine_id
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SantaFileAccessEventsResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "503":
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+      security:
+        - ApiKeyAuth: []
+      summary: List Santa file access events
       tags:
         - santa
   "/api/v1/santa/{env}/machines":
@@ -8746,6 +9122,603 @@ paths:
       security:
         - ApiKeyAuth: []
       summary: List Santa machines
+      tags:
+        - santa
+  "/api/v1/santa/{env}/machines/{machineid}/rules":
+    get:
+      description: The rules a node receives after scope resolution (node over tag
+        over environment), and its client mode. The node does not need to have
+        synced yet.
+      parameters:
+        - description: Environment name or UUID
+          in: path
+          name: env
+          required: true
+          schema:
+            type: string
+        - description: Node UUID
+          in: path
+          name: machineid
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SantaEffectiveRulesResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "503":
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+      security:
+        - ApiKeyAuth: []
+      summary: List the Santa rules and client mode that apply to one node
+      tags:
+        - santa
+  "/api/v1/santa/{env}/modes":
+    get:
+      parameters:
+        - description: Environment name or UUID
+          in: path
+          name: env
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/santa.ModeOverride"
+                type: array
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "503":
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+      security:
+        - ApiKeyAuth: []
+      summary: List Santa client mode overrides
+      tags:
+        - santa
+    put:
+      description: "Creates the override, or replaces the mode of the existing one for
+        the same tag or node; the result is permanent. With hours (1 to 24),
+        scope node and MONITOR, it is temporary instead: the machine must have
+        synced, it cannot replace a permanent node override (409), and it stops
+        applying when it expires, reverting at the machine's first sync after
+        that."
+      parameters:
+        - description: Environment name or UUID
+          in: path
+          name: env
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/handlers.SantaModeOverrideRequest"
+        description: Override
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/santa.ModeOverride"
+        "202":
+          description: Held for a second admin (require_second_admin)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.PendingChangeResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "503":
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+      security:
+        - ApiKeyAuth: []
+      summary: Set the Santa client mode for a tag or a node
+      tags:
+        - santa
+  "/api/v1/santa/{env}/modes/{id}":
+    delete:
+      parameters:
+        - description: Environment name or UUID
+          in: path
+          name: env
+          required: true
+          schema:
+            type: string
+        - description: Override id
+          in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "503":
+          description: Service Unavailable
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+      security:
+        - ApiKeyAuth: []
+      summary: Delete a Santa client mode override
+      tags:
+        - santa
+  "/api/v1/santa/{env}/reports":
+    get:
+      description: Requires environment admin. Computed from the events osctrl
+        received in the last days days. Ready for lockdown lists the machines
+        assigned MONITOR at their last preflight with their ALLOW_UNKNOWN count
+        (executions LOCKDOWN would have blocked); a machine is ready with none
+        and a sync in the window. Top blocked ranks BLOCK_* events by binary and
+        by team ID. Coverage gaps rank the binaries most executed with no rule
+        deciding them (ALLOW_UNKNOWN or BLOCK_UNKNOWN). Each ranked list has at
+        most 20 entries. Event fields are written by Santa clients.
+      parameters:
+        - description: Environment name or UUID
+          in: path
+          name: env
+          required: true
+          schema:
+            type: string
+        - description: Window in days, 1 to 30 (default 14)
+          in: query
+          name: days
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/santa.Report"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "503":
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+      security:
+        - ApiKeyAuth: []
+      summary: "Santa reports: ready for lockdown, top blocked, rule coverage gaps"
+      tags:
+        - santa
+  "/api/v1/santa/{env}/requests":
+    get:
+      description: Newest first, at most 500. Requires environment admin.
+      parameters:
+        - description: Environment name or UUID
+          in: path
+          name: env
+          required: true
+          schema:
+            type: string
+        - description: pending, approved, denied or expired
+          in: query
+          name: status
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/santa.Request"
+                type: array
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "503":
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+      security:
+        - ApiKeyAuth: []
+      summary: List Santa approval requests
+      tags:
+        - santa
+    post:
+      description: Any signed-in account may call this; no environment permission is
+        needed. For a file, the block must have been reported by the machine;
+        with kind monitor, the machine must have synced, and approval switches
+        it to MONITOR for the hours asked (1 to 24) from the approval. A pending
+        request for the same file (or MONITOR) and machine is returned (200)
+        instead of creating a second one.
+      parameters:
+        - description: Environment name or UUID
+          in: path
+          name: env
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/handlers.SantaRequestCreate"
+        description: Request
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SantaOwnRequest"
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SantaOwnRequest"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "429":
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "503":
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+      security:
+        - ApiKeyAuth: []
+      summary: Request approval for a binary Santa blocked, or temporary MONITOR mode
+      tags:
+        - santa
+  "/api/v1/santa/{env}/requests/{id}":
+    get:
+      description: Requires environment admin.
+      parameters:
+        - description: Environment name or UUID
+          in: path
+          name: env
+          required: true
+          schema:
+            type: string
+        - description: Request ID
+          in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/santa.Request"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "503":
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+      security:
+        - ApiKeyAuth: []
+      summary: Get one Santa approval request
+      tags:
+        - santa
+  "/api/v1/santa/{env}/requests/{id}/decision":
+    post:
+      description: Requires environment admin. Approving creates one BINARY allow rule
+        for the file in the chosen scope, or reuses an allow rule that is
+        already there; clients get it on their next sync. Denying needs a
+        reason.
+      parameters:
+        - description: Environment name or UUID
+          in: path
+          name: env
+          required: true
+          schema:
+            type: string
+        - description: Request ID
+          in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/handlers.SantaRequestDecision"
+        description: Decision
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/santa.Request"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "503":
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+      security:
+        - ApiKeyAuth: []
+      summary: Approve or deny a Santa approval request
+      tags:
+        - santa
+  "/api/v1/santa/{env}/requests/link":
+    post:
+      description: "Requires environment admin: the link token alone decides nothing.
+        A link works once, for the action it was made for, until it expires (72
+        hours). A used, expired or unknown link answers 410."
+      parameters:
+        - description: Environment name or UUID
+          in: path
+          name: env
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/handlers.SantaLinkDecision"
+        description: Token and decision
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/santa.Request"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "410":
+          description: Gone
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "503":
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+      security:
+        - ApiKeyAuth: []
+      summary: Approve or deny a Santa approval request through a notification link
+      tags:
+        - santa
+  "/api/v1/santa/{env}/requests/mine":
+    get:
+      description: Any signed-in account may call this; it only returns requests the
+        caller made.
+      parameters:
+        - description: Environment name or UUID
+          in: path
+          name: env
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/handlers.SantaOwnRequest"
+                type: array
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "503":
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+      security:
+        - ApiKeyAuth: []
+      summary: List the caller's own Santa approval requests
       tags:
         - santa
   "/api/v1/santa/{env}/rules":
@@ -8798,12 +9771,7 @@ paths:
           schema:
             type: string
       requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/handlers.SantaRuleRequest"
-        description: Rule
-        required: true
+        $ref: "#/components/requestBodies/handlers.SantaRuleRequest"
       responses:
         "201":
           description: Created
@@ -8811,6 +9779,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/santa.Rule"
+        "202":
+          description: Held for a second admin (require_second_admin)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.PendingChangeResponse"
         "400":
           description: Bad Request
           content:
@@ -8893,6 +9867,141 @@ paths:
       summary: Delete a Santa rule
       tags:
         - santa
+    put:
+      parameters:
+        - description: Environment name or UUID
+          in: path
+          name: env
+          required: true
+          schema:
+            type: string
+        - description: Rule id
+          in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        $ref: "#/components/requestBodies/handlers.SantaRuleRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/santa.Rule"
+        "202":
+          description: Held for a second admin (require_second_admin)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.PendingChangeResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "503":
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+      security:
+        - ApiKeyAuth: []
+      summary: Update a Santa rule
+      tags:
+        - santa
+  "/api/v1/santa/{env}/rules/import":
+    post:
+      description: Classifies each rule as new, duplicate, conflicting or invalid. New
+        rules are stored in one transaction, and only when no rule is
+        conflicting or invalid; existing rules are never changed. With
+        dry_run=true nothing is stored. The body is limited to 4 MiB. The export
+        format is the list of rules from GET rules; extra fields such as id are
+        ignored.
+      parameters:
+        - description: Environment name or UUID
+          in: path
+          name: env
+          required: true
+          schema:
+            type: string
+        - description: Report only, store nothing
+          in: query
+          name: dry_run
+          schema:
+            type: boolean
+      requestBody:
+        content:
+          application/json:
+            schema:
+              items:
+                $ref: "#/components/schemas/santa.RuleSpec"
+              type: array
+        description: Rules
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/santa.ImportResult"
+        "202":
+          description: Held for a second admin (require_second_admin)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.PendingChangeResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "503":
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+      security:
+        - ApiKeyAuth: []
+      summary: Import Santa rules in bulk
+      tags:
+        - santa
   "/api/v1/santa/{env}/token":
     post:
       description: The plaintext token is returned once; the previous token stops
@@ -8911,6 +10020,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/handlers.SantaTokenResponse"
+        "202":
+          description: Held for a second admin (require_second_admin)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.PendingChangeResponse"
         "403":
           description: Forbidden
           content:
@@ -8932,6 +10047,110 @@ paths:
       security:
         - ApiKeyAuth: []
       summary: Rotate the Santa sync token
+      tags:
+        - santa
+  "/api/v1/santa/{env}/votes":
+    get:
+      description: Any signed-in account may call this. Returns the vote count, both
+        thresholds (0 is off) and whether the caller voted; never who voted.
+      parameters:
+        - description: Environment name or UUID
+          in: path
+          name: env
+          required: true
+          schema:
+            type: string
+        - description: SHA-256 of the file
+          in: query
+          name: sha256
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/santa.VoteStatus"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "503":
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+      security:
+        - ApiKeyAuth: []
+      summary: Get the votes for a binary
+      tags:
+        - santa
+    post:
+      description: "Any signed-in account may call this; no environment permission is
+        needed. The block must have been reported by the machine. One vote per
+        account and file: voting again changes nothing. At the local threshold
+        each voter's machine gets a BINARY allow rule; at the global threshold
+        the environment gets one. A file blocked by a rule cannot be voted for
+        (409), and neither can any file while both thresholds are 0 (409)."
+      parameters:
+        - description: Environment name or UUID
+          in: path
+          name: env
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/handlers.SantaVoteCreate"
+        description: Vote
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/santa.VoteStatus"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "503":
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+      security:
+        - ApiKeyAuth: []
+      summary: Vote to allow a binary Santa blocked
       tags:
         - santa
   "/api/v1/saved-queries/{env}":
@@ -9253,6 +10472,699 @@ paths:
       summary: Update saved query
       tags:
         - saved-queries
+  /api/v1/scim:
+    get:
+      description: Requires superuser.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMStatusResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+      security:
+        - ApiKeyAuth: []
+      summary: SCIM provisioning status
+      tags:
+        - scim
+  /api/v1/scim/token:
+    delete:
+      description: POST makes a new token, which turns SCIM on and replaces any
+        previous token; it is shown once. DELETE removes it, which turns SCIM
+        off. Requires superuser.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMTokenResponse"
+        "204":
+          description: No Content
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "503":
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+      security:
+        - ApiKeyAuth: []
+      summary: Rotate or remove the SCIM token
+      tags:
+        - scim
+    post:
+      description: POST makes a new token, which turns SCIM on and replaces any
+        previous token; it is shown once. DELETE removes it, which turns SCIM
+        off. Requires superuser.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMTokenResponse"
+        "204":
+          description: No Content
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+        "503":
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+      security:
+        - ApiKeyAuth: []
+      summary: Rotate or remove the SCIM token
+      tags:
+        - scim
+  /api/v1/scim/v2/Groups:
+    get:
+      description: GET supports `filter=displayName eq "x"` (also externalId, id),
+        startIndex, count and excludedAttributes=members. POST provisions a
+        group; every member must be a provisioned user. Authenticated with the
+        SCIM bearer token.
+      parameters:
+        - description: attribute eq \
+          in: query
+          name: filter
+          schema:
+            type: string
+        - description: 1-based index
+          in: query
+          name: startIndex
+          schema:
+            type: integer
+        - description: Page size, at most 200
+          in: query
+          name: count
+          schema:
+            type: integer
+        - description: members to leave members out
+          in: query
+          name: excludedAttributes
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/scim.GroupResource"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMListResponse"
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/scim.GroupResource"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMErrorResponse"
+      summary: List or provision SCIM groups
+      tags:
+        - scim
+    post:
+      description: GET supports `filter=displayName eq "x"` (also externalId, id),
+        startIndex, count and excludedAttributes=members. POST provisions a
+        group; every member must be a provisioned user. Authenticated with the
+        SCIM bearer token.
+      parameters:
+        - description: attribute eq \
+          in: query
+          name: filter
+          schema:
+            type: string
+        - description: 1-based index
+          in: query
+          name: startIndex
+          schema:
+            type: integer
+        - description: Page size, at most 200
+          in: query
+          name: count
+          schema:
+            type: integer
+        - description: members to leave members out
+          in: query
+          name: excludedAttributes
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/scim.GroupResource"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMListResponse"
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/scim.GroupResource"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMErrorResponse"
+      summary: List or provision SCIM groups
+      tags:
+        - scim
+  "/api/v1/scim/v2/Groups/{id}":
+    delete:
+      description: PATCH adds, removes and replaces members (including `members[value
+        eq "id"]` paths) and sets displayName and externalId. Authenticated with
+        the SCIM bearer token.
+      parameters:
+        - description: SCIM group ID
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/scim.GroupResource"
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMErrorResponse"
+      summary: Read, replace, patch or delete a SCIM group
+      tags:
+        - scim
+    get:
+      description: PATCH adds, removes and replaces members (including `members[value
+        eq "id"]` paths) and sets displayName and externalId. Authenticated with
+        the SCIM bearer token.
+      parameters:
+        - description: SCIM group ID
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/scim.GroupResource"
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMErrorResponse"
+      summary: Read, replace, patch or delete a SCIM group
+      tags:
+        - scim
+    patch:
+      description: PATCH adds, removes and replaces members (including `members[value
+        eq "id"]` paths) and sets displayName and externalId. Authenticated with
+        the SCIM bearer token.
+      parameters:
+        - description: SCIM group ID
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/scim.GroupResource"
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMErrorResponse"
+      summary: Read, replace, patch or delete a SCIM group
+      tags:
+        - scim
+    put:
+      description: PATCH adds, removes and replaces members (including `members[value
+        eq "id"]` paths) and sets displayName and externalId. Authenticated with
+        the SCIM bearer token.
+      parameters:
+        - description: SCIM group ID
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/scim.GroupResource"
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMErrorResponse"
+      summary: Read, replace, patch or delete a SCIM group
+      tags:
+        - scim
+  /api/v1/scim/v2/ServiceProviderConfig:
+    get:
+      description: What the SCIM endpoint supports. Authenticated with the SCIM bearer
+        token.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMErrorResponse"
+      summary: SCIM service provider configuration
+      tags:
+        - scim
+  /api/v1/scim/v2/Users:
+    get:
+      description: GET supports `filter=userName eq "x"` (also externalId, id),
+        startIndex and count. POST provisions a user and its osctrl account (no
+        access until granted; 409 when a local or service account has the name).
+        Authenticated with the SCIM bearer token.
+      parameters:
+        - description: attribute eq \
+          in: query
+          name: filter
+          schema:
+            type: string
+        - description: 1-based index
+          in: query
+          name: startIndex
+          schema:
+            type: integer
+        - description: Page size, at most 200
+          in: query
+          name: count
+          schema:
+            type: integer
+      requestBody:
+        $ref: "#/components/requestBodies/scim.UserResource"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMListResponse"
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/scim.UserResource"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMErrorResponse"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMErrorResponse"
+      summary: List or provision SCIM users
+      tags:
+        - scim
+    post:
+      description: GET supports `filter=userName eq "x"` (also externalId, id),
+        startIndex and count. POST provisions a user and its osctrl account (no
+        access until granted; 409 when a local or service account has the name).
+        Authenticated with the SCIM bearer token.
+      parameters:
+        - description: attribute eq \
+          in: query
+          name: filter
+          schema:
+            type: string
+        - description: 1-based index
+          in: query
+          name: startIndex
+          schema:
+            type: integer
+        - description: Page size, at most 200
+          in: query
+          name: count
+          schema:
+            type: integer
+      requestBody:
+        $ref: "#/components/requestBodies/scim.UserResource"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMListResponse"
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/scim.UserResource"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMErrorResponse"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMErrorResponse"
+      summary: List or provision SCIM users
+      tags:
+        - scim
+  "/api/v1/scim/v2/Users/{id}":
+    delete:
+      description: PATCH sets active, userName, externalId, displayName, name and
+        emails; other attributes are accepted and ignored. active=false disables
+        the osctrl account and ends its sessions; DELETE deletes the account and
+        its permissions. The last active superuser is never disabled or deleted
+        (409). Authenticated with the SCIM bearer token.
+      parameters:
+        - description: SCIM user ID
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/scim.UserResource"
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMErrorResponse"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMErrorResponse"
+      summary: Read, replace, patch or delete a SCIM user
+      tags:
+        - scim
+    get:
+      description: PATCH sets active, userName, externalId, displayName, name and
+        emails; other attributes are accepted and ignored. active=false disables
+        the osctrl account and ends its sessions; DELETE deletes the account and
+        its permissions. The last active superuser is never disabled or deleted
+        (409). Authenticated with the SCIM bearer token.
+      parameters:
+        - description: SCIM user ID
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/scim.UserResource"
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMErrorResponse"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMErrorResponse"
+      summary: Read, replace, patch or delete a SCIM user
+      tags:
+        - scim
+    patch:
+      description: PATCH sets active, userName, externalId, displayName, name and
+        emails; other attributes are accepted and ignored. active=false disables
+        the osctrl account and ends its sessions; DELETE deletes the account and
+        its permissions. The last active superuser is never disabled or deleted
+        (409). Authenticated with the SCIM bearer token.
+      parameters:
+        - description: SCIM user ID
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/scim.UserResource"
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMErrorResponse"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMErrorResponse"
+      summary: Read, replace, patch or delete a SCIM user
+      tags:
+        - scim
+    put:
+      description: PATCH sets active, userName, externalId, displayName, name and
+        emails; other attributes are accepted and ignored. active=false disables
+        the osctrl account and ends its sessions; DELETE deletes the account and
+        its permissions. The last active superuser is never disabled or deleted
+        (409). Authenticated with the SCIM bearer token.
+      parameters:
+        - description: SCIM user ID
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/scim.UserResource"
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMErrorResponse"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.SCIMErrorResponse"
+      summary: Read, replace, patch or delete a SCIM user
+      tags:
+        - scim
   /api/v1/service-config:
     get:
       description: Returns all service configuration sections across all services.
@@ -11051,6 +12963,36 @@ paths:
       summary: Execute user action
       tags:
         - users
+  "/api/v1/users/{username}/groups":
+    get:
+      description: From SCIM when SCIM provisions the user, otherwise from their last
+        SSO login (stored only with Santa enabled). Requires the same access as
+        reading the user.
+      parameters:
+        - description: Username
+          in: path
+          name: username
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/handlers.UserGroupsResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/types.ApiErrorResponse"
+      security:
+        - ApiKeyAuth: []
+      summary: IdP groups stored for a user
+      tags:
+        - users
   "/api/v1/users/{username}/permissions":
     get:
       description: Returns per-environment permissions for a user.
@@ -12016,6 +13958,12 @@ components:
             $ref: "#/components/schemas/handlers.MFAWebAuthnRequest"
       description: Request body
       required: true
+    scim.UserResource:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/scim.UserResource"
+      description: User (POST)
     types.ApiActionsRequest:
       content:
         application/json:
@@ -12065,6 +14013,19 @@ components:
             $ref: "#/components/schemas/handlers.MFAPasswordRequest"
       description: Request body
       required: true
+    handlers.SantaRuleRequest:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/handlers.SantaRuleRequest"
+      description: Rule
+      required: true
+    scim.GroupResource:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/scim.GroupResource"
+      description: Group (POST)
   securitySchemes:
     ApiKeyAuth:
       in: header
@@ -12222,6 +14183,33 @@ components:
         - CarvePlatformLinux
         - CarvePlatformDarwin
         - CarvePlatformWindows
+    changes.Change:
+      properties:
+        action:
+          description: What the change does, as it appears in the audit log
+          type: string
+        body:
+          description: The request body, sent again unchanged to apply the change
+          type: string
+        created_at:
+          type: string
+        decided_at:
+          type: string
+        decided_by:
+          type: string
+        expires_at:
+          type: string
+        id:
+          type: integer
+        method:
+          type: string
+        path:
+          type: string
+        requested_by:
+          type: string
+        status:
+          type: string
+      type: object
     environments.EnvironmentPackage:
       properties:
         architecture:
@@ -12372,6 +14360,42 @@ components:
           type: integer
         query:
           type: integer
+      type: object
+    handlers.ChangeDecision:
+      properties:
+        decision:
+          description: approve | deny; the requester can only deny (withdraw) their own
+            change
+          type: string
+      type: object
+    handlers.ChangeView:
+      properties:
+        action:
+          description: What the change does, as it appears in the audit log
+          type: string
+        body:
+          description: The request body, sent again unchanged to apply the change
+          type: string
+        created_at:
+          type: string
+        decided_at:
+          type: string
+        decided_by:
+          type: string
+        expires_at:
+          type: string
+        id:
+          type: integer
+        method:
+          type: string
+        mine:
+          type: boolean
+        path:
+          type: string
+        requested_by:
+          type: string
+        status:
+          type: string
       type: object
     handlers.EnvStats:
       properties:
@@ -12623,39 +14647,275 @@ components:
         uuid:
           type: string
       type: object
+    handlers.PendingChangeResponse:
+      properties:
+        message:
+          type: string
+        pending_change:
+          $ref: "#/components/schemas/changes.Change"
+      type: object
+    handlers.SCIMErrorResponse:
+      properties:
+        detail:
+          type: string
+        schemas:
+          items:
+            type: string
+          type: array
+        scimType:
+          type: string
+        status:
+          type: string
+      type: object
+    handlers.SCIMListResponse:
+      properties:
+        Resources: {}
+        itemsPerPage:
+          type: integer
+        schemas:
+          items:
+            type: string
+          type: array
+        startIndex:
+          type: integer
+        totalResults:
+          type: integer
+      type: object
+    handlers.SCIMStatusResponse:
+      properties:
+        enabled:
+          type: boolean
+        token_created_at:
+          description: TokenCreatedAt is when the current token was made.
+          type: string
+      type: object
+    handlers.SCIMTokenResponse:
+      properties:
+        token:
+          type: string
+      type: object
     handlers.SantaConfigRequest:
       properties:
+        allowed_path_regex:
+          description: Executions from matching paths are allowed when no rule matches;
+            empty is off. At most 1024 characters
+          type: string
+        approval_url:
+          description: Base https URL of the osctrl UI; when set, the block dialog links
+            to the approval request page. Empty turns requests off
+          type: string
         batch_size:
           type: integer
         block_usb_mount:
+          description: "Deprecated: use removable_media; only read when it is empty (true
+            means BLOCK)."
           type: boolean
+        blocked_path_regex:
+          description: Executions from matching paths are blocked when no rule matches;
+            checked before allowed_path_regex. Empty is off
+          type: string
         client_mode:
           type: string
+        disable_unknown_event_upload:
+          description: Skip uploading executions that LOCKDOWN would block
+          type: boolean
+        enable_all_event_upload:
+          description: Upload every execution decision, not only blocks and would-be blocks
+          type: boolean
+        enable_bundles:
+          description: Clients hash the bundle of a blocked binary and upload its other
+            binaries when osctrl asks
+          type: boolean
         enable_transitive_rules:
           type: boolean
+        encrypted_removable_media:
+          description: "Override for encrypted volumes: ALLOW | BLOCK | REMOUNT; empty
+            uses removable_media"
+          type: string
+        encrypted_removable_media_flags:
+          description: Required with encrypted REMOUNT; same values as removable_media_flags
+          items:
+            type: string
+          type: array
+        event_detail_text:
+          description: Label of the block dialog button, at most 32 characters
+          type: string
+        event_detail_url:
+          description: https URL of the block dialog button, with Santa placeholders such
+            as %file_sha%; overrides the approval request link
+          type: string
+        full_sync_interval_seconds:
+          description: "Seconds between full syncs: 0 for the Santa default (600),
+            otherwise 60 to 86400."
+          type: integer
+        group_match:
+          description: 'How the primary user matches an osctrl user for group_tags: ""
+            (exact username, any case), local_part (username before "@") or
+            email (account email). Ambiguous matches get no tags'
+          type: string
+        group_tags:
+          description: IdP groups whose members' machines get a tag of the environment (at
+            most 100), matched on Santa's primary user
+          items:
+            $ref: "#/components/schemas/santa.GroupTag"
+          type: array
+        notify_channels:
+          description: Alert channel IDs told about each new approval request, at most 10.
+            Needs approval_url. Changing it requires superuser
+          items:
+            type: integer
+          type: array
+        override_file_access_action:
+          description: "Overrides the action of MDM-deployed file access rules: NONE |
+            AUDIT_ONLY | DISABLE; empty leaves the clients unchanged"
+          type: string
+        removable_media:
+          description: ALLOW | BLOCK | REMOUNT; empty means ALLOW
+          type: string
+        removable_media_flags:
+          description: "Required with REMOUNT: rdonly, noexec, nosuid, nobrowse, noowners,
+            nodev, async, -j"
+          items:
+            type: string
+          type: array
+        require_second_admin:
+          description: Hold changes that weaken enforcement until another environment
+            admin approves them (see /api/v1/changes). Turning it off is one of
+            them
+          type: boolean
+        vote_global_threshold:
+          description: Votes that allow the file in the whole environment; 0 is off, and
+            it cannot be below the local threshold. Needs approval_url
+          type: integer
+        vote_local_threshold:
+          description: Votes that allow a blocked file on each voter's machine; 0 is off.
+            Needs approval_url
+          type: integer
       type: object
     handlers.SantaConfigResponse:
       properties:
+        allowed_path_regex:
+          description: Executions from matching paths are allowed or blocked when no rule
+            matches; empty is off
+          type: string
+        approval_url:
+          description: >-
+            Base https URL of the osctrl UI. When set, the Santa block dialog
+            links to
+
+            its approval request page; empty turns approval requests off.
+          type: string
         batch_size:
           description: 0 means the Santa default (50)
           type: integer
         block_usb_mount:
+          description: "Deprecated: derived from removable_media, sent only for older
+            Santa clients"
           type: boolean
+        blocked_path_regex:
+          type: string
         client_mode:
           description: MONITOR | LOCKDOWN
           type: string
         created_at:
           type: string
+        disable_unknown_event_upload:
+          description: Skip uploading executions that LOCKDOWN would block
+          type: boolean
+        enable_all_event_upload:
+          description: Upload every execution decision, not only blocks and would-be blocks
+          type: boolean
+        enable_bundles:
+          description: Clients hash the bundle of a blocked binary and upload its other
+            binaries on request
+          type: boolean
         enable_transitive_rules:
           type: boolean
+        encrypted_removable_media:
+          description: "Override for encrypted volumes: ALLOW | BLOCK | REMOUNT; empty
+            uses removable_media"
+          type: string
+        encrypted_removable_media_flags:
+          description: Mount options used with encrypted REMOUNT
+          items:
+            type: string
+          type: array
         environment_id:
           type: integer
+        event_detail_text:
+          type: string
+        event_detail_url:
+          description: >-
+            https URL of the block dialog button, with Santa placeholders;
+            overrides the
+
+            approval request link. EventDetailText is the button label.
+          type: string
+        full_sync_interval_seconds:
+          description: 0 means the Santa default (600); otherwise
+            MinSyncInterval..MaxSyncInterval
+          type: integer
+        group_match:
+          description: 'How the primary user matches an osctrl user: "" (exact username) |
+            local_part | email'
+          type: string
+        group_tags:
+          description: IdP groups whose members' machines get a tag, matched on the Santa
+            primary user
+          items:
+            $ref: "#/components/schemas/santa.GroupTag"
+          type: array
         id:
           type: integer
+        notify_channels:
+          description: >-
+            Alert channel IDs told about each new approval request, with
+            single-use
+
+            approve and deny links. Needs ApprovalURL.
+          items:
+            type: integer
+          type: array
+        override_file_access_action:
+          description: >-
+            Overrides the action of MDM-deployed file access rules: NONE |
+            AUDIT_ONLY | DISABLE;
+
+            empty sends nothing, leaving each client's setting unchanged
+          type: string
+        removable_media:
+          description: ALLOW | BLOCK | REMOUNT
+          type: string
+        removable_media_flags:
+          description: Mount options used with REMOUNT
+          items:
+            type: string
+          type: array
+        require_second_admin:
+          description: Changes that weaken enforcement wait for a second environment admin
+          type: boolean
         token_set:
           type: boolean
         updated_at:
           type: string
+        vote_global_threshold:
+          description: Votes that allow the file in the whole environment; 0 is off.
+          type: integer
+        vote_local_threshold:
+          description: Votes for a blocked file that allow it on each voter's machine; 0
+            is off.
+          type: integer
+      type: object
+    handlers.SantaEffectiveRulesResponse:
+      properties:
+        client_mode:
+          type: string
+        mode_source:
+          type: string
+        rules:
+          items:
+            $ref: "#/components/schemas/santa.Rule"
+          type: array
       type: object
     handlers.SantaEventsResponse:
       properties:
@@ -12667,6 +14927,123 @@ components:
           type: integer
         total:
           type: integer
+      type: object
+    handlers.SantaFileAccessEventsResponse:
+      properties:
+        events:
+          items:
+            $ref: "#/components/schemas/santa.FileAccessEvent"
+          type: array
+        page:
+          type: integer
+        total:
+          type: integer
+      type: object
+    handlers.SantaLinkDecision:
+      properties:
+        decision:
+          description: approve | deny
+          type: string
+        override:
+          description: Approve although a risk check flagged the file; needs a reason and
+            is audited
+          type: boolean
+        reason:
+          description: Required to deny, optional to approve; at most 1000 characters. The
+            requester sees it
+          type: string
+        scope:
+          description: "On approve, where the allow rule applies: node (the requesting
+            machine), tag or env"
+          type: string
+        scope_value:
+          description: Tag name, with scope tag
+          type: string
+        token:
+          description: The token from the link
+          type: string
+      type: object
+    handlers.SantaModeOverrideRequest:
+      properties:
+        client_mode:
+          description: MONITOR | LOCKDOWN
+          type: string
+        hours:
+          description: Temporary MONITOR mode for 1 to 24 hours, with scope node and
+            MONITOR only; 0 is permanent
+          type: integer
+        scope:
+          description: tag | node
+          type: string
+        scope_value:
+          description: Tag name or node UUID
+          type: string
+      type: object
+    handlers.SantaOwnRequest:
+      properties:
+        created_at:
+          type: string
+        file_sha256:
+          type: string
+        id:
+          type: integer
+        justification:
+          description: Empty when the request was made by someone else
+          type: string
+        kind:
+          description: Empty (allow the file) or monitor
+          type: string
+        machine_id:
+          type: string
+        monitor_hours:
+          description: Hours of MONITOR mode asked for, with kind monitor
+          type: integer
+        reason:
+          description: The approver's reason, when one was given
+          type: string
+        status:
+          type: string
+      type: object
+    handlers.SantaRequestCreate:
+      properties:
+        hours:
+          description: Hours of MONITOR mode, 1 to 24, with kind monitor
+          type: integer
+        justification:
+          description: Why it is needed; at most 1000 characters
+          type: string
+        kind:
+          description: Empty to allow the blocked file, or monitor for temporary MONITOR
+            mode on the machine
+          type: string
+        machine_id:
+          description: Machine (node) UUID, from the block dialog link
+          type: string
+        sha256:
+          description: SHA-256 of the blocked file, from the block dialog link; not used
+            with kind monitor
+          type: string
+      type: object
+    handlers.SantaRequestDecision:
+      properties:
+        decision:
+          description: approve | deny
+          type: string
+        override:
+          description: Approve although a risk check flagged the file; needs a reason and
+            is audited
+          type: boolean
+        reason:
+          description: Required to deny, optional to approve; at most 1000 characters. The
+            requester sees it
+          type: string
+        scope:
+          description: "On approve, where the allow rule applies: node (the requesting
+            machine), tag or env"
+          type: string
+        scope_value:
+          description: Tag name, with scope tag
+          type: string
       type: object
     handlers.SantaRuleRequest:
       properties:
@@ -12690,6 +15067,15 @@ components:
     handlers.SantaTokenResponse:
       properties:
         token:
+          type: string
+      type: object
+    handlers.SantaVoteCreate:
+      properties:
+        machine_id:
+          description: Machine (node) UUID, from the block dialog link
+          type: string
+        sha256:
+          description: SHA-256 of the blocked file, from the block dialog link
           type: string
       type: object
     handlers.StatsResponse:
@@ -12722,6 +15108,25 @@ components:
         total_nodes:
           description: Cross-env totals (the user's allowed envs only).
           type: integer
+      type: object
+    handlers.UserGroupsResponse:
+      properties:
+        groups:
+          items:
+            type: string
+          type: array
+        scim:
+          description: >-
+            SCIM is true when SCIM provisions the user: the groups come from
+            SCIM
+
+            and SSO logins leave them alone.
+          type: boolean
+        updated_at:
+          description: |-
+            UpdatedAt is when the last SSO login stored the groups; empty for
+            SCIM, which keeps them current.
+          type: string
       type: object
     handlers.VulnFindingsResponse:
       properties:
@@ -13185,9 +15590,96 @@ components:
         - PlatformLinux
         - PlatformDarwin
         - PlatformWindows
+    santa.Binary:
+      properties:
+        blocked:
+          type: integer
+        bundle_id:
+          type: string
+        bundle_name:
+          type: string
+        bundle_path:
+          type: string
+        bundle_version:
+          type: string
+        cd_hash:
+          type: string
+        events:
+          description: Events of the file, and how many of them were blocks
+          type: integer
+        file_name:
+          type: string
+        file_path:
+          type: string
+        first_seen:
+          type: string
+        last_seen:
+          type: string
+        latest_carve:
+          type: string
+        latest_event_id:
+          description: The newest event, to retrieve the file from the machine that last
+            ran it
+          type: integer
+        latest_machine_id:
+          type: string
+        machines:
+          description: Distinct machines that reported the file
+          type: integer
+        risk:
+          allOf:
+            - $ref: "#/components/schemas/santa.Risk"
+          description: Cached risk verdict, when risk checks are on
+        rules:
+          description: Rules of any scope naming the file, its team ID, signing ID, CDHash
+            or leaf certificate
+          items:
+            $ref: "#/components/schemas/santa.Rule"
+          type: array
+        sha256:
+          type: string
+        signing_chain:
+          description: Leaf certificate first; empty when unsigned or not reported
+          items:
+            $ref: "#/components/schemas/santa.Cert"
+          type: array
+        signing_id:
+          type: string
+        team_id:
+          type: string
+      type: object
+    santa.Cert:
+      properties:
+        cn:
+          type: string
+        org:
+          type: string
+        ou:
+          type: string
+        sha256:
+          type: string
+        valid_from:
+          type: string
+        valid_until:
+          type: string
+      type: object
     santa.Event:
       properties:
+        bundle_hash:
+          description: Hash of the binary's bundle, lowercase hex; set when bundles are
+            enabled
+          type: string
         bundle_id:
+          type: string
+        bundle_name:
+          type: string
+        bundle_path:
+          type: string
+        bundle_version:
+          type: string
+        carve_name:
+          description: Name of the osquery carve started from this event to retrieve the
+            file; set by osctrl.
           type: string
         cd_hash:
           type: string
@@ -13213,17 +15705,122 @@ components:
           type: string
         node_id:
           type: integer
+        signing_chain:
+          description: >-
+            Leaf certificate first, as the client reported it; empty for
+            unsigned files
+
+            and for events stored before the chain was kept.
+          items:
+            $ref: "#/components/schemas/santa.Cert"
+          type: array
         signing_id:
           type: string
         team_id:
           type: string
+      type: object
+    santa.FileAccessEvent:
+      properties:
+        accessed_at:
+          type: string
+        created_at:
+          type: string
+        decision:
+          description: DENIED | DENIED_INVALID_SIGNATURE | AUDIT_ONLY
+          type: string
+        environment_id:
+          type: integer
+        id:
+          type: integer
+        machine_id:
+          type: string
+        node_id:
+          type: integer
+        process_chain:
+          description: The accessing process first, then its parents
+          items:
+            $ref: "#/components/schemas/santa.Process"
+          type: array
+        rule_name:
+          type: string
+        rule_version:
+          type: string
+        target:
+          description: The path that was accessed
+          type: string
+      type: object
+    santa.GroupTag:
+      properties:
+        group:
+          type: string
+        tag:
+          type: string
+      type: object
+    santa.ImportIssue:
+      properties:
+        index:
+          description: Position of the rule in the import, starting at 0
+          type: integer
+        reason:
+          type: string
+        rule:
+          $ref: "#/components/schemas/santa.RuleSpec"
+      type: object
+    santa.ImportResult:
+      properties:
+        applied:
+          description: >-
+            True when the import was applied (also when there was nothing new to
+            store);
+
+            false on a dry run and when conflicts or invalid rules blocked it
+          type: boolean
+        conflicts:
+          description: Same type, identifier and scope as another rule, but different
+            content
+          items:
+            $ref: "#/components/schemas/santa.ImportIssue"
+          type: array
+        duplicate:
+          description: Rules identical to an existing rule or to an earlier rule in the
+            import; skipped
+          type: integer
+        invalid:
+          description: Rules that fail validation
+          items:
+            $ref: "#/components/schemas/santa.ImportIssue"
+          type: array
+        new:
+          description: Rules that do not exist yet
+          type: integer
+      type: object
+    santa.LockdownCandidate:
+      properties:
+        hostname:
+          type: string
+        last_sync_at:
+          type: string
+        machine_id:
+          type: string
+        mode_source:
+          type: string
+        ready:
+          description: No would-block execution and a sync within the window
+          type: boolean
+        would_block:
+          description: "ALLOW_UNKNOWN events in the window: executions no rule allowed"
+          type: integer
       type: object
     santa.Machine:
       properties:
         applied_digest:
           description: set at postflight
           type: string
+        assigned_mode:
+          description: sent at the last preflight
+          type: string
         client_mode:
+          description: reported by the client
           type: string
         created_at:
           type: string
@@ -13239,6 +15836,9 @@ components:
           type: string
         machine_id:
           description: uppercase UUID
+          type: string
+        mode_source:
+          description: env | tag | node
           type: string
         node_id:
           type: integer
@@ -13259,6 +15859,171 @@ components:
         serial_number:
           type: string
         updated_at:
+          type: string
+      type: object
+    santa.ModeOverride:
+      properties:
+        client_mode:
+          description: MONITOR | LOCKDOWN
+          type: string
+        created_at:
+          type: string
+        created_by:
+          type: string
+        environment_id:
+          type: integer
+        expires_at:
+          description: Set for a temporary override; it stops applying at this time. Nil
+            is permanent.
+          type: string
+        id:
+          type: integer
+        scope:
+          description: tag|node
+          type: string
+        scope_value:
+          description: tag name | node UUID (uppercase)
+          type: string
+        updated_at:
+          type: string
+      type: object
+    santa.Process:
+      properties:
+        cd_hash:
+          type: string
+        file_path:
+          type: string
+        file_sha256:
+          type: string
+        pid:
+          type: integer
+        signing_id:
+          type: string
+        team_id:
+          type: string
+      type: object
+    santa.RankedBinary:
+      properties:
+        events:
+          type: integer
+        file_name:
+          type: string
+        machines:
+          type: integer
+        sha256:
+          type: string
+        team_id:
+          type: string
+      type: object
+    santa.RankedTeam:
+      properties:
+        binaries:
+          type: integer
+        events:
+          type: integer
+        machines:
+          type: integer
+        team_id:
+          type: string
+      type: object
+    santa.Report:
+      properties:
+        coverage_gaps:
+          description: Most executed binaries that no rule decided (ALLOW_UNKNOWN or
+            BLOCK_UNKNOWN)
+          items:
+            $ref: "#/components/schemas/santa.RankedBinary"
+          type: array
+        days:
+          type: integer
+        lockdown_ready:
+          description: Machines assigned MONITOR at their last preflight, ready ones first
+          items:
+            $ref: "#/components/schemas/santa.LockdownCandidate"
+          type: array
+        since:
+          type: string
+        top_blocked:
+          description: Most blocked binaries and team IDs
+          items:
+            $ref: "#/components/schemas/santa.RankedBinary"
+          type: array
+        top_blocked_teams:
+          items:
+            $ref: "#/components/schemas/santa.RankedTeam"
+          type: array
+      type: object
+    santa.Request:
+      properties:
+        created_at:
+          type: string
+        decided_at:
+          type: string
+        decided_by:
+          description: Set when the request is approved or denied.
+          type: string
+        environment_id:
+          type: integer
+        event_id:
+          type: integer
+        executing_user:
+          type: string
+        file_name:
+          type: string
+        file_path:
+          type: string
+        file_sha256:
+          type: string
+        id:
+          type: integer
+        justification:
+          type: string
+        kind:
+          description: '"" (allow the file) or monitor (temporary MONITOR mode, no file
+            fields)'
+          type: string
+        machine_id:
+          type: string
+        monitor_hours:
+          description: Hours of MONITOR mode asked for, with kind monitor
+          type: integer
+        reason:
+          description: Why it was denied; optional note on an approval.
+          type: string
+        requester:
+          type: string
+        risk:
+          allOf:
+            - $ref: "#/components/schemas/santa.Risk"
+          description: Cached risk verdict of the file, when risk checks are on; not stored
+        risk_override:
+          description: The approver allowed the file although a risk check flagged it
+          type: boolean
+        rule_id:
+          description: The allow rule an approval created or reused; 0 otherwise.
+          type: integer
+        signing_id:
+          type: string
+        status:
+          description: pending|approved|denied|expired
+          type: string
+        team_id:
+          type: string
+        updated_at:
+          type: string
+      type: object
+    santa.Risk:
+      properties:
+        checks:
+          items:
+            $ref: "#/components/schemas/santa.Verdict"
+          type: array
+        verdict:
+          description: >-
+            flagged if any check flagged, error if any failed, clean if any
+            found it
+
+            clean, unknown when none knows it, unchecked when nothing is cached
           type: string
       type: object
     santa.Rule:
@@ -13292,6 +16057,138 @@ components:
           description: '""| tag name | node UUID (uppercase)'
           type: string
         updated_at:
+          type: string
+      type: object
+    santa.RuleSpec:
+      properties:
+        cel_expr:
+          type: string
+        custom_msg:
+          type: string
+        custom_url:
+          type: string
+        identifier:
+          type: string
+        policy:
+          type: string
+        rule_type:
+          type: string
+        scope:
+          type: string
+        scope_value:
+          type: string
+      type: object
+    santa.Verdict:
+      properties:
+        check:
+          type: string
+        checked_at:
+          type: string
+        detail:
+          type: string
+        expires_at:
+          type: string
+        verdict:
+          type: string
+      type: object
+    santa.VoteStatus:
+      properties:
+        allowed:
+          description: 'What the votes reached for the caller: "" (nothing yet), node or
+            env'
+          type: string
+        global_threshold:
+          description: Votes that allow the file in the whole environment; 0 is off
+          type: integer
+        local_threshold:
+          description: Votes that allow the file on each voter's machine; 0 is off
+          type: integer
+        voted:
+          description: Whether the caller has voted for the file
+          type: boolean
+        votes:
+          type: integer
+      type: object
+    scim.Email:
+      properties:
+        primary:
+          type: boolean
+        type:
+          type: string
+        value:
+          type: string
+      type: object
+    scim.GroupResource:
+      properties:
+        displayName:
+          type: string
+        externalId:
+          type: string
+        id:
+          type: string
+        members:
+          items:
+            $ref: "#/components/schemas/scim.Ref"
+          type: array
+        meta:
+          $ref: "#/components/schemas/scim.Meta"
+        schemas:
+          items:
+            type: string
+          type: array
+      type: object
+    scim.Meta:
+      properties:
+        created:
+          type: string
+        lastModified:
+          type: string
+        resourceType:
+          type: string
+      type: object
+    scim.Name:
+      properties:
+        familyName:
+          type: string
+        formatted:
+          type: string
+        givenName:
+          type: string
+      type: object
+    scim.Ref:
+      properties:
+        display:
+          type: string
+        value:
+          type: string
+      type: object
+    scim.UserResource:
+      properties:
+        active:
+          type: boolean
+        displayName:
+          type: string
+        emails:
+          items:
+            $ref: "#/components/schemas/scim.Email"
+          type: array
+        externalId:
+          type: string
+        groups:
+          items:
+            $ref: "#/components/schemas/scim.Ref"
+          type: array
+        id:
+          type: string
+        meta:
+          $ref: "#/components/schemas/scim.Meta"
+        name:
+          $ref: "#/components/schemas/scim.Name"
+        schemas:
+          items:
+            type: string
+          type: array
+        userName:
           type: string
       type: object
     serviceconfig.ServiceConfig:
@@ -13425,13 +16322,16 @@ components:
           type: boolean
         auth_source:
           description: |-
-            AuthSource is empty for the password-login path (the default)
-            and "oidc" for users JIT-provisioned through the federated
-            callback. Surfaced so the SPA Users page can show an "OIDC"
-            badge alongside the existing admin/service labels.
+            AuthSource is empty for the password-login path (the default),
+            "oidc" or "saml" for users of federated login, and "scim" for users
+            SCIM created that have not signed in yet. Surfaced so the SPA Users
+            page can show a badge alongside the existing admin/service labels.
           type: string
         created_at:
           type: string
+        disabled:
+          description: Disabled accounts cannot log in; SCIM sets it on deactivation.
+          type: boolean
         email:
           type: string
         env_manager:

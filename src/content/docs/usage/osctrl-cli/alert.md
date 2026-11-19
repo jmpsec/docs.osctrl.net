@@ -97,7 +97,7 @@ USAGE:
 
 OPTIONS:
    --name string, -n string         Rule name
-   --source string, -s string       Source: result_log | status_log | query_log | node_inactive | node_recovered | vuln_finding
+   --source string, -s string       Source: result_log | status_log | query_log | node_inactive | node_recovered | vuln_finding | santa_event
    --match-type string, -m string   Match type: substring | regex (default: "substring")
    --match-field string             Field to match (empty = any field)
    --match-value string, -v string  Pattern to match
